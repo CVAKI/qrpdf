@@ -9,7 +9,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script>
 <style>
   :root{
     --paper:#F6F5F1;
@@ -19,195 +18,276 @@
     --line:#DAD6C8;
     --cobalt:#24469B;
     --cobalt-dark:#182F6C;
-    --btn-fg:#FFFFFF;
     --amber:#B65C1E;
     --ok:#2C6E49;
-    --err:#A32020;
-  }
-  @media (prefers-color-scheme: dark){
-    :root:not([data-theme="light"]){
-      --paper:#141519;
-      --surface:#1D1F24;
-      --ink:#E9E7E0;
-      --ink-soft:#A29F97;
-      --line:#34363C;
-      --cobalt:#8AA7EC;
-      --cobalt-dark:#A7BEF4;
-      --btn-fg:#12131A;
-      --amber:#E0A05A;
-      --ok:#6FCF97;
-      --err:#EC8A8A;
-    }
-  }
-  :root[data-theme="dark"]{
-    --paper:#141519;
-    --surface:#1D1F24;
-    --ink:#E9E7E0;
-    --ink-soft:#A29F97;
-    --line:#34363C;
-    --cobalt:#8AA7EC;
-    --cobalt-dark:#A7BEF4;
-    --btn-fg:#12131A;
-    --amber:#E0A05A;
-    --ok:#6FCF97;
-    --err:#EC8A8A;
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
   body{
     background:var(--paper);
     color:var(--ink);
-    font-family:'IBM Plex Mono', monospace, monospace;
+    font-family:'IBM Plex Mono', monospace;
     font-size:14px;
     line-height:1.55;
     -webkit-font-smoothing:antialiased;
   }
   h1,h2,h3{
-    font-family:'Space Grotesk', system-ui, sans-serif;
+    font-family:'Space Grotesk', sans-serif;
     font-weight:600;
     margin:0 0 6px 0;
     letter-spacing:-0.01em;
   }
-  .wrap{max-width:840px; margin:0 auto; padding:36px 20px 80px;}
-  header.top{
-    display:flex; align-items:baseline; justify-content:space-between; gap:12px;
-    border-bottom:2px solid var(--ink); padding-bottom:14px; margin-bottom:24px;
+  .wrap{
+    max-width:760px;
+    margin:0 auto;
+    padding:36px 20px 80px;
   }
-  header.top h1{font-size:22px;}
-  header.top .mark{font-size:11.5px; color:var(--ink-soft); text-align:right;}
-
-  .tabs{display:flex; margin-bottom:28px; border:1px solid var(--ink);}
+  header.top{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    border-bottom:2px solid var(--ink);
+    padding-bottom:14px;
+    margin-bottom:24px;
+  }
+  header.top h1{
+    font-size:22px;
+  }
+  header.top .mark{
+    font-size:12px;
+    color:var(--ink-soft);
+  }
+  .tabs{
+    display:flex;
+    gap:0;
+    margin-bottom:28px;
+    border:1px solid var(--ink);
+  }
   .tab{
-    flex:1; text-align:center; padding:11px 8px; cursor:pointer;
-    background:var(--surface); color:var(--ink-soft);
-    font-family:'Space Grotesk', system-ui, sans-serif; font-weight:600; font-size:14px;
-    user-select:none; border-right:1px solid var(--ink);
+    flex:1;
+    text-align:center;
+    padding:11px 8px;
+    cursor:pointer;
+    background:var(--surface);
+    color:var(--ink-soft);
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:600;
+    font-size:14px;
+    user-select:none;
+    border-right:1px solid var(--ink);
   }
   .tab:last-child{border-right:none;}
-  .tab.active{background:var(--ink); color:var(--paper);}
+  .tab.active{
+    background:var(--ink);
+    color:var(--paper);
+  }
   .panel{display:none;}
   .panel.active{display:block;}
 
-  .card{background:var(--surface); border:1px solid var(--line); padding:22px; margin-bottom:18px;}
+  .card{
+    background:var(--surface);
+    border:1px solid var(--line);
+    padding:22px;
+    margin-bottom:18px;
+  }
   .card h2{font-size:16px; margin-bottom:4px;}
   .sub{color:var(--ink-soft); font-size:12.5px; margin-bottom:16px;}
 
   .field{margin-bottom:16px;}
   .field label{
-    display:block; font-size:12px; text-transform:uppercase; letter-spacing:0.06em;
-    color:var(--ink-soft); margin-bottom:6px;
+    display:block;
+    font-size:12px;
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    color:var(--ink-soft);
+    margin-bottom:6px;
   }
-  input[type="file"], input[type="number"], select{
-    width:100%; max-width:100%; font-family:inherit; font-size:13px; padding:9px 10px;
-    background:var(--paper); border:1px solid var(--line); color:var(--ink);
+  input[type="file"], input[type="number"]{
+    width:100%;
+    font-family:inherit;
+    font-size:13px;
+    padding:9px 10px;
+    background:var(--paper);
+    border:1px solid var(--line);
+    color:var(--ink);
   }
-  input[type="number"]{max-width:160px;}
-  input[type="range"]{width:100%; accent-color:var(--cobalt);}
-
-  .grid2{display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:16px;}
+  input[type="number"]{max-width:140px;}
 
   button{
-    font-family:'Space Grotesk', system-ui, sans-serif; font-weight:600; font-size:13.5px;
-    padding:11px 20px; background:var(--cobalt); color:var(--btn-fg); border:none;
-    cursor:pointer; letter-spacing:0.01em;
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:600;
+    font-size:13.5px;
+    padding:11px 20px;
+    background:var(--cobalt);
+    color:#fff;
+    border:none;
+    cursor:pointer;
+    letter-spacing:0.01em;
   }
   button:hover{background:var(--cobalt-dark);}
-  button:disabled{background:#B7B4A8; color:#3a3a36; cursor:not-allowed;}
-  button.secondary{background:transparent; color:var(--cobalt); border:1.5px solid var(--cobalt);}
-  button.secondary:hover{background:rgba(127,160,232,.14);}
-  button.tiny{padding:4px 9px; font-size:11.5px;}
+  button:disabled{background:#B7B4A8; cursor:not-allowed;}
+  button.secondary{
+    background:transparent;
+    color:var(--cobalt);
+    border:1.5px solid var(--cobalt);
+  }
+  button.secondary:hover{background:#EDF0F8;}
   .btn-row{display:flex; gap:10px; flex-wrap:wrap;}
 
-  .status{font-size:12.5px; padding:10px 12px; border-left:3px solid var(--line); background:var(--paper); margin-top:14px; word-break:break-word;}
+  .status{
+    font-size:12.5px;
+    padding:10px 12px;
+    border-left:3px solid var(--line);
+    background:var(--paper);
+    margin-top:14px;
+  }
   .status.warn{border-color:var(--amber); color:var(--amber);}
   .status.ok{border-color:var(--ok); color:var(--ok);}
   .status.info{border-color:var(--cobalt); color:var(--cobalt-dark);}
-  .status.err{border-color:var(--err); color:var(--err);}
 
   .meta-line{color:var(--ink-soft); font-size:12.5px; margin-top:4px;}
-  .readout{font-size:12.5px; background:var(--paper); border:1px solid var(--line); padding:10px 12px; margin-top:6px; overflow-x:auto;}
-  .readout b{font-weight:600;}
-  .stamp{display:inline-block; font-size:11px; padding:2px 7px; border:1px solid var(--cobalt); color:var(--cobalt-dark); margin-bottom:8px;}
 
-  .filelist{border:1px solid var(--line); margin-bottom:16px;}
-  .filerow{display:flex; align-items:center; gap:10px; padding:8px 10px; border-bottom:1px solid var(--line); font-size:12.5px;}
-  .filerow:last-child{border-bottom:none;}
-  .filerow .nm{flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
-  .filerow .sz{color:var(--ink-soft); font-size:11.5px;}
-  .empty{padding:14px 10px; color:var(--ink-soft); font-size:12.5px;}
-
-  #qrGrid{display:grid; grid-template-columns:repeat(auto-fill, minmax(150px,1fr)); gap:14px; margin-top:18px;}
-  .qr-cell{border:1px solid var(--line); background:#fff; padding:10px; text-align:center; min-height:180px;}
-  .qr-cell .idx{font-size:11px; color:#5B5A52; margin-top:6px;}
+  #qrGrid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(150px,1fr));
+    gap:14px;
+    margin-top:18px;
+  }
+  .qr-cell{
+    border:1px solid var(--line);
+    background:#fff;
+    padding:10px;
+    text-align:center;
+  }
+  .qr-cell .idx{
+    font-size:11px;
+    color:var(--ink-soft);
+    margin-top:6px;
+  }
   .qr-cell canvas, .qr-cell img{max-width:100%; height:auto;}
-  .qr-cell .ph{color:#DAD6C8; font-size:11px; padding-top:70px;}
 
-  /* ---- viewport: the video is a NORMAL in-flow block (width:100%, height:auto),
-         exactly like the version confirmed working on-device. The wrapper takes
-         its height FROM the video, so there is no percentage-height chain that
-         can collapse to zero. Overlays sit on top, absolutely positioned. ---- */
-  .viewport{
-    position:relative; width:100%; max-width:460px; margin:16px auto 0;
-    background:#0B0C0E; border:1px solid var(--line); font-size:0;
+  video{
+    width:100%;
+    max-width:420px;
+    display:block;
+    background:#000;
+    margin:0 auto;
   }
-  .viewport video{
-    display:block; width:100%; height:auto; max-width:100%;
-    background:#0B0C0E;
-  }
-  .viewport #overlay{position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none;}
-  .viewport .brackets{position:absolute; top:10%; left:10%; right:10%; bottom:10%; pointer-events:none;}
-  .viewport .brackets i{position:absolute; width:26px; height:26px; border:2.5px solid rgba(255,255,255,.85);}
-  .viewport .brackets i:nth-child(1){top:0; left:0; border-right:none; border-bottom:none;}
-  .viewport .brackets i:nth-child(2){top:0; right:0; border-left:none; border-bottom:none;}
-  .viewport .brackets i:nth-child(3){bottom:0; left:0; border-right:none; border-top:none;}
-  .viewport .brackets i:nth-child(4){bottom:0; right:0; border-left:none; border-top:none;}
-  .viewport.locked .brackets i{border-color:#4ADE80;}
-  .viewport .vp-idle{
-    position:static; display:block; padding:64px 20px;
-    color:#9B9A93; font-size:12.5px; text-align:center; line-height:1.5;
-  }
-  .viewport .vp-hud{
-    position:absolute; left:0; right:0; bottom:0; padding:6px 10px;
-    background:rgba(11,12,14,.72); color:#E8E6DF; font-size:11px; letter-spacing:.04em;
-  }
-  .vp-tools{display:flex; gap:12px; align-items:center; max-width:460px; margin:10px auto 0; flex-wrap:wrap;}
+  .scan-wrap{text-align:center;}
 
-  .progress-bar{height:8px; background:var(--line); margin-top:12px; position:relative; overflow:hidden;}
-  .progress-bar > div{height:100%; background:var(--cobalt); width:0%; transition:width .15s ease;}
-  .chunk-grid{display:flex; flex-wrap:wrap; gap:4px; margin-top:12px;}
+  .progress-bar{
+    height:8px;
+    background:var(--line);
+    margin-top:12px;
+    position:relative;
+    overflow:hidden;
+  }
+  .progress-bar > div{
+    height:100%;
+    background:var(--cobalt);
+    width:0%;
+    transition:width .2s ease;
+  }
+  .chunk-grid{
+    display:flex;
+    flex-wrap:wrap;
+    gap:5px;
+    margin-top:12px;
+  }
   .chunk-dot{
-    width:20px; height:20px; display:flex; align-items:center; justify-content:center;
-    font-size:8.5px; border:1px solid var(--line); color:var(--ink-soft);
+    width:22px; height:22px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:9px;
+    border:1px solid var(--line);
+    color:var(--ink-soft);
   }
-  .chunk-dot.got{background:var(--ok); border-color:var(--ok); color:#0f1a14;}
+  .chunk-dot.got{
+    background:var(--ok);
+    border-color:var(--ok);
+    color:#fff;
+  }
 
   a.download-link{
-    display:inline-block; margin:8px 8px 0 0; padding:10px 18px;
-    background:var(--ok); color:#0f1a14; text-decoration:none;
-    font-family:'Space Grotesk', system-ui, sans-serif; font-weight:600; font-size:13px;
+    display:inline-block;
+    margin-top:14px;
+    padding:11px 20px;
+    background:var(--ok);
+    color:#fff;
+    text-decoration:none;
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:600;
+    font-size:13.5px;
   }
-  footer{margin-top:40px; font-size:11.5px; color:var(--ink-soft); border-top:1px solid var(--line); padding-top:14px;}
 
-  #playOverlay{display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:#000; z-index:1000;
-    flex-direction:column; align-items:center; justify-content:center; padding:18px;}
+  footer{
+    margin-top:40px;
+    font-size:11.5px;
+    color:var(--ink-soft);
+    border-top:1px solid var(--line);
+    padding-top:14px;
+  }
+
+  /* play overlay */
+  #playOverlay{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:#101114;
+    z-index:1000;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+  }
   #playOverlay.active{display:flex;}
-  #playStage{background:#fff; padding:18px; display:flex; align-items:center; justify-content:center;}
+  #playStage{
+    background:#fff;
+    padding:22px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
   #playStage canvas, #playStage img{
-    width:min(80vw, 78vh); height:min(80vw, 78vh);
-    image-rendering:pixelated; shape-rendering:crispEdges;
+    width:min(78vw, 420px);
+    height:min(78vw, 420px);
   }
-  #playInfo{color:#F6F5F1; font-family:'Space Grotesk',system-ui,sans-serif; font-weight:600; font-size:16px; margin-top:14px;}
-  #playSub{color:#9B9A93; font-size:11.5px; margin-top:4px; text-align:center;}
-  .play-controls{display:flex; align-items:center; gap:10px; margin-top:16px; flex-wrap:wrap; justify-content:center;}
-  .play-controls select, .play-controls input[type=number]{
-    font-family:inherit; font-size:12.5px; padding:8px 10px;
-    background:#1E2019; color:#F6F5F1; border:1px solid #444; width:auto; max-width:120px;
+  #playInfo{
+    color:#F6F5F1;
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:600;
+    font-size:16px;
+    margin-top:18px;
   }
-  .play-controls button{color:#F6F5F1; background:transparent; border:1.5px solid #9B9A93;}
-  .play-controls button:hover{background:#2A2B2F;}
+  #playSub{
+    color:#9B9A93;
+    font-size:12px;
+    margin-top:4px;
+  }
+  .play-controls{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    margin-top:22px;
+    flex-wrap:wrap;
+    justify-content:center;
+  }
+  .play-controls select{
+    font-family:inherit;
+    font-size:12.5px;
+    padding:8px 10px;
+    background:#1E2019;
+    color:#F6F5F1;
+    border:1px solid #444;
+  }
+  #playClose{
+    background:transparent;
+    border:1.5px solid #9B9A93;
+    color:#F6F5F1;
+  }
+  #playClose:hover{background:#2A2B2F;}
 
   @media print{
-    header.top, .tabs, .card .sub, #genForm, footer, .no-print, .filelist{display:none !important;}
+    header.top, .tabs, .card .sub, #genForm, footer, .no-print{display:none !important;}
     body{background:#fff;}
     .wrap{max-width:none; padding:0;}
     #qrGrid{grid-template-columns:repeat(2, 1fr); gap:24px;}
@@ -220,7 +300,7 @@
 
   <header class="top">
     <h1>PDF ⇄ QR</h1>
-    <div class="mark">offline &nbsp;·&nbsp; no upload<br><span id="buildTag"></span></div>
+    <div class="mark">offline &nbsp;·&nbsp; no upload</div>
   </header>
 
   <div class="tabs">
@@ -231,47 +311,20 @@
   <!-- ENCODE -->
   <div class="panel active" id="panel-encode">
     <div class="card">
-      <h2>1. Choose PDFs</h2>
-      <p class="sub">Add one or more files — they're packed into a single sequence, compressed, split across QR codes, and rebuilt on the other side.</p>
+      <h2>1. Choose a PDF</h2>
+      <p class="sub">A QR code holds a small amount of data, so the file is split across a sequence of codes and reassembled when scanned. Small PDFs (roughly under 40–60 KB) work best — large files will need a lot of codes.</p>
       <form id="genForm">
         <div class="field">
-          <label for="pdfInput">Add files</label>
-          <input type="file" id="pdfInput" accept="application/pdf,*/*" multiple>
+          <label for="pdfInput">PDF file</label>
+          <input type="file" id="pdfInput" accept="application/pdf" required>
         </div>
-
-        <div class="filelist" id="fileList"><div class="empty">No files added yet.</div></div>
-
-        <div class="grid2">
-          <div class="field">
-            <label for="chunkSize">Bytes per QR code</label>
-            <input type="number" id="chunkSize" value="600" min="100" max="2200" step="25">
-            <div class="meta-line"><label style="display:inline; text-transform:none; letter-spacing:0;">
-              <input type="checkbox" id="autoChunk" checked style="width:auto;"> auto-suggest</label></div>
-          </div>
-          <div class="field">
-            <label for="eccLevel">Error correction</label>
-            <select id="eccLevel">
-              <option value="L" selected>L — 7% (densest, fewest codes)</option>
-              <option value="M">M — 15% (balanced)</option>
-              <option value="Q">Q — 25% (rough conditions)</option>
-              <option value="H">H — 30% (max robustness)</option>
-            </select>
-          </div>
-          <div class="field">
-            <label for="compress">Compression</label>
-            <select id="compress">
-              <option value="9" selected>gzip — maximum</option>
-              <option value="6">gzip — fast</option>
-              <option value="0">off (raw)</option>
-            </select>
-          </div>
+        <div class="field">
+          <label for="chunkSize">Bytes per QR code</label>
+          <input type="number" id="chunkSize" value="350" min="100" max="2000" step="50">
         </div>
-
-        <div class="readout" id="estimate">Add a file to see the estimate.</div>
-
-        <div class="btn-row" style="margin-top:16px;">
-          <button type="submit" id="genBtn" disabled>Generate QR sequence</button>
-          <button type="button" class="secondary" id="clearBtn">Clear all</button>
+        <p class="meta-line">Lower = larger, easier-to-scan codes but more of them. If your camera struggles to read codes, try 250–350.</p>
+        <div class="btn-row">
+          <button type="submit">Generate QR sequence</button>
         </div>
       </form>
       <div id="genStatus"></div>
@@ -282,7 +335,6 @@
       <p class="sub" id="resultSub"></p>
       <div class="btn-row">
         <button id="playBtn">▶ Play sequence</button>
-        <button class="secondary" id="renderAllBtn">Render all codes</button>
         <button class="secondary" id="printBtn">Print / save as PDF</button>
         <button class="secondary" id="dlAllBtn">Download all as PNGs</button>
       </div>
@@ -296,22 +348,15 @@
     <div id="playInfo">1 / 1</div>
     <div id="playSub">Point the other device's camera at this screen</div>
     <div class="play-controls">
-      <button id="playPauseBtn">⏸ Pause</button>
-      <button id="playPrevBtn">◀</button>
-      <button id="playNextBtn">▶</button>
+      <button class="secondary" id="playPauseBtn" style="border-color:#9B9A93; color:#F6F5F1;">⏸ Pause</button>
+      <button class="secondary" id="playPrevBtn" style="border-color:#9B9A93; color:#F6F5F1;">◀ Prev</button>
+      <button class="secondary" id="playNextBtn" style="border-color:#9B9A93; color:#F6F5F1;">Next ▶</button>
       <select id="playSpeed">
-        <option value="60">Turbo — 60ms (16 fps)</option>
-        <option value="100">Very fast — 100ms (10 fps)</option>
-        <option value="150">Fast — 150ms (6.6 fps)</option>
-        <option value="250">Brisk — 250ms (4 fps)</option>
-        <option value="400" selected>Normal — 400ms</option>
-        <option value="700">Steady — 700ms</option>
-        <option value="1000">Slow — 1s</option>
-        <option value="1500">Slower — 1.5s</option>
+        <option value="600">Fast — 0.6s</option>
+        <option value="1000" selected>Normal — 1s</option>
+        <option value="1500">Slow — 1.5s</option>
         <option value="2500">Very slow — 2.5s</option>
-        <option value="custom">Custom…</option>
       </select>
-      <input type="number" id="playCustom" value="400" min="30" max="5000" step="10" style="display:none;">
       <button id="playClose">Close</button>
     </div>
   </div>
@@ -320,31 +365,21 @@
   <div class="panel" id="panel-decode">
     <div class="card">
       <h2>1. Scan the codes</h2>
-      <p class="sub">Point your camera at the sequence — any order, repeats are ignored. Leave it running through a few loops until every tile turns green.</p>
-
-      <div id="diagPanel" class="readout" style="margin-bottom:14px;"></div>
+      <p class="sub">Point your phone's camera at each QR code in the sequence (any order). Missing ones are tracked below.</p>
 
       <div id="mobileCamBlock">
         <div class="btn-row">
           <button id="startCamBtn">Start camera</button>
           <button class="secondary" id="stopCamBtn" disabled>Stop camera</button>
-          <button class="secondary" id="recheckBtn">Re-check</button>
         </div>
-        <div class="viewport" id="viewport">
-          <video id="video" playsinline webkit-playsinline muted autoplay style="display:none;"></video>
-          <canvas id="overlay"></canvas>
-          <div class="brackets"><i></i><i></i><i></i><i></i></div>
-          <div class="vp-idle" id="vpIdle">Camera preview — press <b>Start camera</b></div>
-          <div class="vp-hud" id="vpHud"></div>
+        <div class="scan-wrap">
+          <video id="video" playsinline muted style="display:none;"></video>
+          <canvas id="scanCanvas" style="display:none;"></canvas>
         </div>
-        <canvas id="scanCanvas" style="display:none;"></canvas>
-        <div class="vp-tools" id="vpTools" style="display:none;">
-          <button class="secondary tiny" id="torchBtn" style="display:none;">🔦 Torch</button>
-          <label id="zoomWrap" style="display:none; flex:1; min-width:140px;">
-            <span style="font-size:11px; color:var(--ink-soft);">Zoom</span>
-            <input type="range" id="zoomRange" min="1" max="5" step="0.1" value="1">
-          </label>
-        </div>
+      </div>
+
+      <div id="desktopCamBlock" style="display:none;">
+        <div class="status info">Live camera scanning is only offered on phones — use your phone to scan the QR sequence. On this device, upload QR code images below instead.</div>
       </div>
 
       <div class="field" style="margin-top:18px;">
@@ -357,29 +392,16 @@
       <div class="meta-line" id="progressLabel" style="display:none;"></div>
       <div class="chunk-grid" id="chunkGrid"></div>
       <div id="downloadArea"></div>
-      <div class="btn-row" id="resetRow" style="display:none; margin-top:16px;">
-        <button class="secondary tiny" id="resetSessionBtn">Reset session</button>
-      </div>
     </div>
   </div>
 
   <footer>
-    Everything runs locally in this page — files are never uploaded anywhere.
-    QR generation uses qrcodejs, scanning uses jsQR, compression uses pako.
+    Everything runs locally in this page — files are never uploaded anywhere. QR generation uses qrcodejs; scanning uses jsQR.
   </footer>
 </div>
 
 <script>
-/* =========================================================
-   BUILD STAMP — bump this on every edit. If the number shown
-   in the header / diagnostics panel is not the latest one,
-   the browser is serving a CACHED copy and nothing you see
-   reflects the current code.
-   ========================================================= */
-const BUILD = 'B10 · 2026-09-19 · in-flow-video';
-document.getElementById('buildTag').textContent = 'build ' + BUILD;
-
-/* ================= tabs ================= */
+/* ---------- tabs ---------- */
 document.querySelectorAll('.tab').forEach(t=>{
   t.addEventListener('click', ()=>{
     document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
@@ -387,537 +409,252 @@ document.querySelectorAll('.tab').forEach(t=>{
     t.classList.add('active');
     document.getElementById('panel-'+t.dataset.tab).classList.add('active');
     if(t.dataset.tab === 'encode') stopCamera();
-    else fixViewportHeight();
   });
 });
 
-/* ================= helpers ================= */
-const MAGIC = 'PQPDF2';
-function genId(){ return Math.random().toString(36).slice(2,8).toUpperCase(); }
-function fmtKB(b){ return b < 1024 ? b+' B' : (b/1024).toFixed(1)+' KB'; }
-function eccConst(v){
-  return {L:QRCode.CorrectLevel.L, M:QRCode.CorrectLevel.M, Q:QRCode.CorrectLevel.Q, H:QRCode.CorrectLevel.H}[v] || QRCode.CorrectLevel.L;
+/* ---------- helpers ---------- */
+function genId(){
+  return Math.random().toString(36).slice(2,8).toUpperCase();
 }
-function bytesToBase64(bytes){
+function arrayBufferToBase64(buf){
   let binary = '';
+  const bytes = new Uint8Array(buf);
   const chunk = 0x8000;
   for(let i=0;i<bytes.length;i+=chunk){
     binary += String.fromCharCode.apply(null, bytes.subarray(i, i+chunk));
   }
   return btoa(binary);
 }
-function base64ToBytes(b64){
+function base64ToArrayBuffer(b64){
   const binary = atob(b64);
   const bytes = new Uint8Array(binary.length);
   for(let i=0;i<binary.length;i++) bytes[i] = binary.charCodeAt(i);
-  return bytes;
+  return bytes.buffer;
 }
 
-/* ================= container format ================= */
-function buildContainer(files){
-  const enc = new TextEncoder();
-  const manifest = JSON.stringify({ f: files.map(f=>({ n:f.name, s:f.bytes.length })) });
-  const head = enc.encode(MAGIC+'\n'+manifest+'\n');
-  const total = head.length + files.reduce((a,f)=>a+f.bytes.length,0);
-  const out = new Uint8Array(total);
-  out.set(head, 0);
-  let off = head.length;
-  for(const f of files){ out.set(f.bytes, off); off += f.bytes.length; }
-  return out;
-}
-function parseContainer(bytes){
-  const dec = new TextDecoder();
-  const nl1 = bytes.indexOf(10);
-  if(nl1 < 0 || dec.decode(bytes.subarray(0, nl1)) !== MAGIC) return null;
-  const nl2 = bytes.indexOf(10, nl1+1);
-  if(nl2 < 0) return null;
-  const manifest = JSON.parse(dec.decode(bytes.subarray(nl1+1, nl2)));
-  let off = nl2+1;
-  return manifest.f.map(m=>{
-    const b = bytes.subarray(off, off+m.s);
-    off += m.s;
-    return { name:m.n, bytes:b };
-  });
-}
-
-/* ================= ENCODE ================= */
-const genForm      = document.getElementById('genForm');
-const genStatus    = document.getElementById('genStatus');
-const resultCard   = document.getElementById('resultCard');
-const resultSub    = document.getElementById('resultSub');
-const qrGrid       = document.getElementById('qrGrid');
-const fileListEl   = document.getElementById('fileList');
-const chunkInput   = document.getElementById('chunkSize');
-const autoChunkBox = document.getElementById('autoChunk');
-const eccSel       = document.getElementById('eccLevel');
-const compressSel  = document.getElementById('compress');
-const estimateEl   = document.getElementById('estimate');
-const genBtn       = document.getElementById('genBtn');
-
-let pendingFiles = [];
-let qrPayloads   = [];
-let currentEcc   = 'L';
-
-document.getElementById('pdfInput').addEventListener('change', async (e)=>{
-  const files = Array.from(e.target.files||[]);
-  for(const f of files){
-    const buf = await f.arrayBuffer();
-    pendingFiles.push({ name: f.name.replace(/\|/g,'_'), bytes: new Uint8Array(buf) });
-  }
-  e.target.value = '';
-  renderFileList();
-  refreshEstimate();
-});
-
-document.getElementById('clearBtn').addEventListener('click', ()=>{
-  pendingFiles = []; qrPayloads = [];
-  qrGrid.innerHTML = '';
-  resultCard.style.display='none';
-  genStatus.innerHTML='';
-  renderFileList(); refreshEstimate();
-});
-
-function renderFileList(){
-  if(!pendingFiles.length){
-    fileListEl.innerHTML = '<div class="empty">No files added yet.</div>';
-    genBtn.disabled = true;
-    return;
-  }
-  genBtn.disabled = false;
-  fileListEl.innerHTML = '';
-  pendingFiles.forEach((f,i)=>{
-    const row = document.createElement('div');
-    row.className = 'filerow';
-    const nm = document.createElement('div');
-    nm.className = 'nm'; nm.textContent = (i+1)+'. '+f.name;
-    const sz = document.createElement('div');
-    sz.className = 'sz'; sz.textContent = fmtKB(f.bytes.length);
-    const rm = document.createElement('button');
-    rm.type='button'; rm.className='secondary tiny'; rm.textContent='remove';
-    rm.addEventListener('click', ()=>{ pendingFiles.splice(i,1); renderFileList(); refreshEstimate(); });
-    row.appendChild(nm); row.appendChild(sz); row.appendChild(rm);
-    fileListEl.appendChild(row);
-  });
-}
-
-const ECC_CAP = { L:2900, M:2300, Q:1600, H:1250 };
-
-function suggestChunk(b64len, ecc){
-  const cap = ECC_CAP[ecc] || 2900;
-  let s;
-  if(b64len <= 4000)        s = 350;
-  else if(b64len <= 15000)  s = 600;
-  else if(b64len <= 60000)  s = 900;
-  else if(b64len <= 200000) s = 1400;
-  else                      s = Math.min(cap - 40, 2000);
-  return Math.max(100, Math.min(s, cap - 40));
-}
-
-let packCache = null;
-function packKey(){
-  return pendingFiles.map(f=>f.name+':'+f.bytes.length).join('~') + '#' + compressSel.value;
-}
-function packedSize(){
-  if(!pendingFiles.length) return null;
-  const key = packKey();
-  if(packCache && packCache.key === key) return packCache;
-  const container = buildContainer(pendingFiles);
-  const level = parseInt(compressSel.value,10);
-  const payload = level > 0 ? pako.gzip(container, { level }) : container;
-  packCache = { key, payload, raw: container.length };
-  return packCache;
-}
-
-function refreshEstimate(){
-  if(!pendingFiles.length){ estimateEl.textContent = 'Add a file to see the estimate.'; return; }
-  const { payload, raw } = packedSize();
-  const b64len = Math.ceil(payload.length/3)*4;
-  const ecc = eccSel.value;
-  if(autoChunkBox.checked) chunkInput.value = suggestChunk(b64len, ecc);
-  const cap = ECC_CAP[ecc] - 40;
-  let chunk = parseInt(chunkInput.value,10) || 600;
-  if(chunk > cap){ chunk = cap; if(autoChunkBox.checked) chunkInput.value = chunk; }
-  const total = Math.ceil(b64len / chunk);
-
-  const saved = raw ? Math.round(100 - (payload.length/raw)*100) : 0;
-  const secs = Math.round(total * 400 / 1000);
-  let html = '<b>'+pendingFiles.length+'</b> file(s) · <b>'+fmtKB(raw)+'</b> raw'
-    + (parseInt(compressSel.value,10) > 0 ? ' → <b>'+fmtKB(payload.length)+'</b> packed ('+saved+'% smaller)' : '')
-    + ' · <b>'+total+'</b> QR code(s) at '+chunk+' bytes each'
-    + '<br><span style="color:var(--ink-soft)">One full pass ≈ '+secs+'s at 400ms/frame, ≈ '+Math.round(total*0.1)+'s on turbo.</span>';
-  if(chunk > cap - 200) html += '<br><span style="color:var(--amber)">Near the QR capacity limit — codes will be very dense.</span>';
-  if(total > 300) html += '<br><span style="color:var(--amber)">'+total+' codes is a long transfer.</span>';
-  estimateEl.innerHTML = html;
-}
-
-chunkInput.addEventListener('input', ()=>{ autoChunkBox.checked = false; refreshEstimate(); });
-autoChunkBox.addEventListener('change', refreshEstimate);
-eccSel.addEventListener('change', refreshEstimate);
-compressSel.addEventListener('change', refreshEstimate);
+/* ---------- ENCODE ---------- */
+const genForm = document.getElementById('genForm');
+const genStatus = document.getElementById('genStatus');
+const resultCard = document.getElementById('resultCard');
+const resultSub = document.getElementById('resultSub');
+const qrGrid = document.getElementById('qrGrid');
+let qrPayloads = []; // holds the raw payload strings for the current sequence
 
 genForm.addEventListener('submit', (e)=>{
   e.preventDefault();
-  if(!pendingFiles.length) return;
-  genStatus.innerHTML = '<div class="status info">Packing…</div>';
+  const file = document.getElementById('pdfInput').files[0];
+  const chunkSize = parseInt(document.getElementById('chunkSize').value, 10) || 700;
+  if(!file){ return; }
+  genStatus.innerHTML = '<div class="status info">Reading file…</div>';
   qrGrid.innerHTML = '';
   resultCard.style.display = 'none';
 
-  setTimeout(()=>{
-    try{
-      const { payload, raw } = packedSize();
-      const b64 = bytesToBase64(payload);
-      const ecc = eccSel.value;
-      currentEcc = ecc;
-      const cap = ECC_CAP[ecc] - 40;
-      let chunk = Math.min(parseInt(chunkInput.value,10) || 600, cap);
-      const id = genId();
-      const total = Math.ceil(b64.length / chunk);
+  const reader = new FileReader();
+  reader.onload = function(ev){
+    const b64 = arrayBufferToBase64(ev.target.result);
+    const id = genId();
+    const fname = file.name.replace(/[|]/g,'_');
+    const total = Math.ceil(b64.length / chunkSize);
 
-      qrPayloads = [];
-      for(let i=0;i<total;i++){
-        qrPayloads.push(['Q2', id, total, i, b64.slice(i*chunk, (i+1)*chunk)].join('|'));
-      }
-
-      renderGridLazy(id, total);
-      const names = pendingFiles.map(f=>f.name).join(', ');
-      resultSub.textContent = names+' — '+total+' code(s), ECC '+ecc+', sequence ID '+id
-        +'. Play them on this screen and scan with the other device.';
-      resultCard.style.display = 'block';
-      genStatus.innerHTML = '<div class="status ok">Packed '+fmtKB(raw)+' → '+fmtKB(payload.length)
-        +' → '+total+' QR code(s). Hit “Play sequence” for the fastest transfer.</div>';
-    }catch(err){
-      genStatus.innerHTML = '<div class="status err">Could not build the sequence: '+err.message+'</div>';
+    if(total > 400){
+      genStatus.innerHTML = '<div class="status warn">This file needs '+total+' QR codes at this chunk size — that\'s a lot to scan reliably. Try a smaller PDF or increase bytes per QR code.</div>';
+    } else {
+      genStatus.innerHTML = '<div class="status ok">File read: '+(file.size/1024).toFixed(1)+' KB → '+total+' QR code(s).</div>';
     }
-  }, 30);
+
+    qrGrid.innerHTML = '';
+    qrPayloads = [];
+    for(let i=0;i<total;i++){
+      const chunk = b64.slice(i*chunkSize, (i+1)*chunkSize);
+      // payload: id|total|index|filename(only on chunk 0)|data
+      const payload = [id, total, i, i===0 ? fname : '', chunk].join('|');
+      qrPayloads.push(payload);
+
+      const cell = document.createElement('div');
+      cell.className = 'qr-cell';
+      const holder = document.createElement('div');
+      cell.appendChild(holder);
+      const label = document.createElement('div');
+      label.className = 'idx';
+      label.textContent = (i+1)+' / '+total+'   ['+id+']';
+      cell.appendChild(label);
+      qrGrid.appendChild(cell);
+
+      new QRCode(holder, {
+        text: payload,
+        width: 180,
+        height: 180,
+        correctLevel: QRCode.CorrectLevel.L
+      });
+    }
+
+    resultSub.textContent = fname+' — '+total+' code(s), sequence ID '+id+'. Scan in any order on the "Scan QR → PDF" tab.';
+    resultCard.style.display = 'block';
+  };
+  reader.readAsArrayBuffer(file);
 });
 
-let gridObserver = null;
-function renderGridLazy(id, total){
-  if(gridObserver) gridObserver.disconnect();
-  qrGrid.innerHTML = '';
-  const cells = [];
-  for(let i=0;i<total;i++){
-    const cell = document.createElement('div');
-    cell.className = 'qr-cell';
-    cell.dataset.idx = i;
-    cell.innerHTML = '<div class="ph">'+(i+1)+'</div><div class="idx">'+(i+1)+' / '+total+'   ['+id+']</div>';
-    qrGrid.appendChild(cell);
-    cells.push(cell);
-  }
-  if('IntersectionObserver' in window){
-    gridObserver = new IntersectionObserver((entries)=>{
-      entries.forEach(en=>{ if(en.isIntersecting){ drawCell(en.target); gridObserver.unobserve(en.target); } });
-    }, { rootMargin:'300px' });
-    cells.forEach(c=>gridObserver.observe(c));
-  } else {
-    cells.forEach(drawCell);
-  }
-}
-function drawCell(cell){
-  if(cell.dataset.drawn) return;
-  cell.dataset.drawn = '1';
-  const i = parseInt(cell.dataset.idx,10);
-  const ph = cell.querySelector('.ph');
-  const holder = document.createElement('div');
-  if(ph) cell.replaceChild(holder, ph);
-  else cell.insertBefore(holder, cell.firstChild);
-  new QRCode(holder, { text:qrPayloads[i], width:180, height:180, correctLevel:eccConst(currentEcc) });
-}
-document.getElementById('renderAllBtn').addEventListener('click', ()=>{
-  qrGrid.querySelectorAll('.qr-cell').forEach(drawCell);
-});
-document.getElementById('printBtn').addEventListener('click', ()=>{
-  qrGrid.querySelectorAll('.qr-cell').forEach(drawCell);
-  setTimeout(()=>window.print(), 300);
-});
+document.getElementById('printBtn').addEventListener('click', ()=> window.print());
+
 document.getElementById('dlAllBtn').addEventListener('click', ()=>{
-  qrGrid.querySelectorAll('.qr-cell').forEach(drawCell);
-  setTimeout(()=>{
-    const nodes = qrGrid.querySelectorAll('canvas, .qr-cell img');
-    let i = 0;
-    const step = ()=>{
-      if(i >= nodes.length) return;
-      const node = nodes[i];
-      const url = node.tagName === 'CANVAS' ? node.toDataURL('image/png') : node.src;
-      const a = document.createElement('a');
-      a.href = url; a.download = 'qr_'+String(i+1).padStart(3,'0')+'.png';
-      document.body.appendChild(a); a.click(); document.body.removeChild(a);
-      i++;
-      setTimeout(step, 120);
-    };
-    step();
-  }, 400);
+  const canvases = qrGrid.querySelectorAll('canvas');
+  canvases.forEach((c, i)=>{
+    const a = document.createElement('a');
+    a.href = c.toDataURL('image/png');
+    a.download = 'qr_'+String(i+1).padStart(3,'0')+'.png';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  });
 });
 
-/* ================= PLAYER ================= */
-const playOverlay  = document.getElementById('playOverlay');
-const playStage    = document.getElementById('playStage');
-const playInfo     = document.getElementById('playInfo');
+/* ---------- PLAY SEQUENCE ---------- */
+const playOverlay = document.getElementById('playOverlay');
+const playStage = document.getElementById('playStage');
+const playInfo = document.getElementById('playInfo');
 const playSpeedSel = document.getElementById('playSpeed');
-const playCustom   = document.getElementById('playCustom');
 const playPauseBtn = document.getElementById('playPauseBtn');
-const playSub      = document.getElementById('playSub');
 
-let playIdx = 0, playTimer = null, playRunning = false, playLoops = 0;
-const frameCache = new Map();
-const CACHE_MAX = 24;
+let playIdx = 0;
+let playTimer = null;
+let playRunning = false;
 
-function frameNode(i){
-  if(frameCache.has(i)) return frameCache.get(i);
-  const holder = document.createElement('div');
-  new QRCode(holder, { text:qrPayloads[i], width:560, height:560, correctLevel:eccConst(currentEcc) });
-  if(frameCache.size >= CACHE_MAX) frameCache.delete(frameCache.keys().next().value);
-  frameCache.set(i, holder);
-  return holder;
-}
 function renderPlayFrame(){
   if(!qrPayloads.length) return;
-  const node = frameNode(playIdx);
   playStage.innerHTML = '';
-  playStage.appendChild(node);
-  playInfo.textContent = (playIdx+1)+' / '+qrPayloads.length + (playLoops ? '   · loop '+(playLoops+1) : '');
-  const nxt = (playIdx+1) % qrPayloads.length;
-  if(!frameCache.has(nxt)) setTimeout(()=>frameNode(nxt), 0);
+  new QRCode(playStage, {
+    text: qrPayloads[playIdx],
+    width: 380,
+    height: 380,
+    correctLevel: QRCode.CorrectLevel.L
+  });
+  playInfo.textContent = (playIdx+1)+' / '+qrPayloads.length;
 }
-function currentSpeed(){
-  return playSpeedSel.value === 'custom'
-    ? Math.max(30, parseInt(playCustom.value,10) || 400)
-    : parseInt(playSpeedSel.value,10);
-}
+
 function playTick(){
-  playIdx = playIdx + 1;
-  if(playIdx >= qrPayloads.length){ playIdx = 0; playLoops++; }
+  playIdx = (playIdx + 1) % qrPayloads.length;
   renderPlayFrame();
 }
+
 function startPlayTimer(){
   stopPlayTimer();
-  playTimer = setInterval(playTick, currentSpeed());
+  const speed = parseInt(playSpeedSel.value, 10) || 1000;
+  playTimer = setInterval(playTick, speed);
   playRunning = true;
   playPauseBtn.textContent = '⏸ Pause';
 }
 function stopPlayTimer(){
   if(playTimer) clearInterval(playTimer);
-  playTimer = null; playRunning = false;
+  playTimer = null;
+  playRunning = false;
 }
+
 document.getElementById('playBtn').addEventListener('click', ()=>{
   if(!qrPayloads.length) return;
-  playIdx = 0; playLoops = 0;
-  frameCache.clear();
+  playIdx = 0;
   playOverlay.classList.add('active');
-  playSub.textContent = 'Point the other device\'s camera at this screen — any order, so just let it loop.';
   renderPlayFrame();
   startPlayTimer();
 });
+
 document.getElementById('playClose').addEventListener('click', ()=>{
-  stopPlayTimer(); playOverlay.classList.remove('active'); frameCache.clear();
+  stopPlayTimer();
+  playOverlay.classList.remove('active');
 });
+
 playPauseBtn.addEventListener('click', ()=>{
-  if(playRunning){ stopPlayTimer(); playPauseBtn.textContent = '▶ Resume'; }
-  else startPlayTimer();
+  if(playRunning){
+    stopPlayTimer();
+    playPauseBtn.textContent = '▶ Resume';
+  } else {
+    startPlayTimer();
+  }
 });
+
 document.getElementById('playNextBtn').addEventListener('click', ()=>{
-  playIdx = (playIdx+1) % qrPayloads.length; renderPlayFrame(); if(playRunning) startPlayTimer();
+  playIdx = (playIdx + 1) % qrPayloads.length;
+  renderPlayFrame();
+  if(playRunning) startPlayTimer(); // reset interval so timing feels responsive
 });
 document.getElementById('playPrevBtn').addEventListener('click', ()=>{
-  playIdx = (playIdx-1+qrPayloads.length) % qrPayloads.length; renderPlayFrame(); if(playRunning) startPlayTimer();
-});
-playSpeedSel.addEventListener('change', ()=>{
-  playCustom.style.display = playSpeedSel.value === 'custom' ? 'inline-block' : 'none';
+  playIdx = (playIdx - 1 + qrPayloads.length) % qrPayloads.length;
+  renderPlayFrame();
   if(playRunning) startPlayTimer();
 });
-playCustom.addEventListener('change', ()=>{ if(playRunning) startPlayTimer(); });
-document.addEventListener('keydown', (e)=>{
-  if(!playOverlay.classList.contains('active')) return;
-  if(e.key === 'Escape'){ stopPlayTimer(); playOverlay.classList.remove('active'); }
-  if(e.key === ' '){ e.preventDefault(); playPauseBtn.click(); }
-  if(e.key === 'ArrowRight') document.getElementById('playNextBtn').click();
-  if(e.key === 'ArrowLeft')  document.getElementById('playPrevBtn').click();
+playSpeedSel.addEventListener('change', ()=>{
+  if(playRunning) startPlayTimer();
 });
 
-/* ================= viewport sizing (no aspect-ratio dependency) ================= */
-const viewportEl = document.getElementById('viewport');
-/* The video now sizes the wrapper itself (width:100%, height:auto), so there is
-   nothing to force. This only keeps the overlay canvas matched to the box. */
-function fixViewportHeight(){
-  try{
-    const w = Math.round(viewportEl.clientWidth);
-    const h = Math.round(viewportEl.clientHeight);
-    const ov = document.getElementById('overlay');
-    if(ov && w && h && (ov.width !== w || ov.height !== h)){ ov.width = w; ov.height = h; }
-  }catch(e){}
-}
-window.addEventListener('resize', fixViewportHeight);
-window.addEventListener('orientationchange', ()=>setTimeout(fixViewportHeight, 300));
-setTimeout(fixViewportHeight, 0);
-setTimeout(fixViewportHeight, 600);
+/* ---------- device detection ---------- */
+const isMobile = /Android|iPhone|iPad|iPod|Mobile|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+  || (navigator.maxTouchPoints > 1 && /Mac/.test(navigator.platform)); // iPadOS reports as Mac
+document.getElementById('mobileCamBlock').style.display = isMobile ? 'block' : 'none';
+document.getElementById('desktopCamBlock').style.display = isMobile ? 'none' : 'block';
 
-/* ================= environment diagnostics ================= */
-const diagPanel = document.getElementById('diagPanel');
-
-function detectInApp(){
-  const ua = navigator.userAgent || '';
-  const hits = [];
-  if(/FBAN|FBAV|FB_IAB/i.test(ua)) hits.push('Facebook');
-  if(/Instagram/i.test(ua)) hits.push('Instagram');
-  if(/WhatsApp/i.test(ua)) hits.push('WhatsApp');
-  if(/Line\//i.test(ua)) hits.push('LINE');
-  if(/Snapchat/i.test(ua)) hits.push('Snapchat');
-  if(/Twitter/i.test(ua)) hits.push('X/Twitter');
-  if(/TikTok|musical_ly|BytedanceWebview/i.test(ua)) hits.push('TikTok');
-  if(/; wv\)/i.test(ua)) hits.push('Android WebView');
-  if(/Telegram/i.test(ua)) hits.push('Telegram');
-  return hits;
-}
-
-async function runDiagnostics(){
-  const inIframe = (function(){ try{ return window.self !== window.top; }catch(e){ return true; } })();
-  const proto    = location.protocol;
-  const secure   = !!window.isSecureContext;
-  const hasAPI   = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
-  const libs     = { QRCode: typeof QRCode !== 'undefined', jsQR: typeof jsQR === 'function', pako: typeof pako !== 'undefined' };
-  const inApp    = detectInApp();
-
-  let perm = 'unknown';
-  try{
-    if(navigator.permissions && navigator.permissions.query){
-      const p = await navigator.permissions.query({ name:'camera' });
-      perm = p.state;
-    }
-  }catch(e){ perm = 'not reportable'; }
-
-  let camCount = 'not checked', camLabels = '';
-  if(hasAPI && navigator.mediaDevices.enumerateDevices){
-    try{
-      const devs = (await navigator.mediaDevices.enumerateDevices()).filter(d=>d.kind === 'videoinput');
-      camCount = devs.length;
-      camLabels = devs.map(d=>d.label).filter(Boolean).join(' / ');
-    }catch(e){ camCount = 'enumerateDevices failed ('+e.name+')'; }
-  }
-
-  const yes = '<span style="color:var(--ok)">ok</span>';
-  const no  = '<span style="color:var(--err)">no</span>';
-  const rows = [
-    ['Page address', proto + '//' + location.host + (inIframe ? ' (inside an embedded preview)' : '')],
-    ['Secure context (https/localhost)', secure ? yes : no],
-    ['Embedded in iframe', inIframe ? '<span style="color:var(--err)">yes — blocks camera</span>' : yes],
-    ['In-app browser', inApp.length ? '<span style="color:var(--amber)">'+inApp.join(', ')+'</span>' : 'no'],
-    ['getUserMedia available', hasAPI ? yes : no],
-    ['Camera permission', perm],
-    ['Cameras reported', camCount + (camLabels ? ' — '+camLabels : '')],
-    ['Libraries', (libs.QRCode?'QRCode '+yes:'QRCode '+no)+' · '+(libs.jsQR?'jsQR '+yes:'jsQR '+no)+' · '+(libs.pako?'pako '+yes:'pako '+no)],
-    ['Viewport box', Math.round(viewportEl.clientWidth)+'×'+Math.round(viewportEl.clientHeight)+' px'],
-    ['Video state', 'readyState '+video.readyState+' · '+(video.videoWidth||0)+'×'+(video.videoHeight||0)+' · paused '+video.paused]
-  ];
-  let html = '<div class="stamp">build '+BUILD+'</div><br><b>Environment check</b><br>' + rows.map(r=>r[0]+': '+r[1]).join('<br>');
-
-  const blockers = [];
-  if(!secure) blockers.push('Not a secure context ('+proto+'). Browsers only allow the camera on <b>https://</b> or <b>localhost</b>. Opening the file by double-clicking (file://) will never work. Run <code>python3 -m http.server 8000</code> in the file\'s folder and open <code>http://localhost:8000/pdf-qr-bridge.html</code>.');
-  if(inIframe) blockers.push('The page is inside an embedded preview. Iframes block camera access regardless of browser settings — open it in its own tab.');
-  if(inApp.length) blockers.push('You appear to be in an in-app browser ('+inApp.join(', ')+'). These often block or silently break camera access — tap the ⋯ menu and choose "Open in browser".');
-  if(!hasAPI) blockers.push('This browser exposes no getUserMedia API at all.');
-  if(camCount === 0) blockers.push('The browser reports <b>0 cameras</b> while permission is '+perm+'. That combination means the phone\'s OS is blocking the browser app itself, not the page. Android: Settings → Apps → [browser] → Permissions → Camera → Allow. iPhone: Settings → [browser] → Camera → Allow. Then fully close and reopen the browser app — a tab reload is not enough.');
-  if(!libs.jsQR) blockers.push('jsQR did not load (CDN blocked or offline) — scanning cannot run until it does.');
-
-  if(blockers.length){
-    html += '<br><br><span style="color:var(--amber)"><b>Likely blockers:</b></span><br>• ' + blockers.join('<br>• ');
-  } else {
-    html += '<br><br><span style="color:var(--ok)">Nothing is blocking the camera — press Start camera and accept the prompt.</span>';
-  }
-  diagPanel.innerHTML = html;
-}
-
-/* ================= DECODE ================= */
-const video        = document.getElementById('video');
-const scanCanvas   = document.getElementById('scanCanvas');
-const scanCtx      = scanCanvas.getContext('2d', { willReadFrequently:true });
-const overlayEl    = document.getElementById('overlay');
-const overlayCtx   = overlayEl.getContext('2d');
-const vpIdle       = document.getElementById('vpIdle');
-const vpHud        = document.getElementById('vpHud');
-const vpTools      = document.getElementById('vpTools');
-const scanStatus   = document.getElementById('scanStatus');
-const chunkGrid    = document.getElementById('chunkGrid');
-const progressBar  = document.getElementById('progressBar');
+/* ---------- DECODE ---------- */
+const video = document.getElementById('video');
+const scanCanvas = document.getElementById('scanCanvas');
+const scanCtx = scanCanvas.getContext('2d', { willReadFrequently:true });
+const scanStatus = document.getElementById('scanStatus');
+const chunkGrid = document.getElementById('chunkGrid');
+const progressBar = document.getElementById('progressBar');
 const progressFill = document.getElementById('progressFill');
-const progressLabel= document.getElementById('progressLabel');
+const progressLabel = document.getElementById('progressLabel');
 const downloadArea = document.getElementById('downloadArea');
-const resetRow     = document.getElementById('resetRow');
-const startCamBtn  = document.getElementById('startCamBtn');
-const stopCamBtn   = document.getElementById('stopCamBtn');
 
-let stream = null, rafId = null;
-let session = null;
+let stream = null;
+let rafId = null;
+let session = null; // {id, total, filename, chunks: Map}
 
 function setStatus(msg, kind){
   scanStatus.innerHTML = '<div class="status '+(kind||'info')+'">'+msg+'</div>';
 }
-document.getElementById('resetSessionBtn').addEventListener('click', ()=>{
-  session = null; downloadArea.innerHTML=''; chunkGrid.innerHTML='';
-  progressBar.style.display='none'; progressLabel.style.display='none';
-  resetRow.style.display='none'; setStatus('Session cleared — ready for a new sequence.','info');
-});
 
-function ensureSession(id, total, legacyName){
+function ensureSession(id, total, filename){
   if(!session || session.id !== id){
-    session = { id, total, chunks:new Map(), legacyName: legacyName||null, done:false };
+    session = { id, total, filename: filename || session?.filename || 'recovered.pdf', chunks: new Map() };
     downloadArea.innerHTML = '';
   }
-  if(legacyName) session.legacyName = legacyName;
-  resetRow.style.display = 'flex';
+  if(filename) session.filename = filename;
+  renderChunkGrid();
 }
 
 function renderChunkGrid(){
   if(!session){ chunkGrid.innerHTML=''; progressBar.style.display='none'; progressLabel.style.display='none'; return; }
   progressBar.style.display = 'block';
   progressLabel.style.display = 'block';
-  if(chunkGrid.childElementCount !== session.total){
-    chunkGrid.innerHTML = '';
-    for(let i=0;i<session.total;i++){
-      const d = document.createElement('div');
-      d.className = 'chunk-dot'; d.textContent = i+1;
-      chunkGrid.appendChild(d);
-    }
-  }
+  chunkGrid.innerHTML = '';
   for(let i=0;i<session.total;i++){
-    if(session.chunks.has(i)) chunkGrid.children[i].classList.add('got');
+    const d = document.createElement('div');
+    d.className = 'chunk-dot' + (session.chunks.has(i) ? ' got' : '');
+    d.textContent = i+1;
+    chunkGrid.appendChild(d);
   }
   const pct = Math.round(100 * session.chunks.size / session.total);
   progressFill.style.width = pct+'%';
-  const missing = session.total - session.chunks.size;
-  progressLabel.textContent = pct+'% — '+session.chunks.size+' / '+session.total+' codes'
-    + (missing && missing <= 12 ? '  · still missing: '+missingList().join(', ') : '');
-  if(session.chunks.size === session.total && !session.done){
-    session.done = true;
+  progressLabel.textContent = pct+'% received — '+session.chunks.size+' / '+session.total+' codes';
+  if(session.chunks.size === session.total){
     completeSession();
   }
-}
-function missingList(){
-  const out = [];
-  for(let i=0;i<session.total;i++) if(!session.chunks.has(i)) out.push(i+1);
-  return out;
 }
 
 function handleDecodedText(text){
   const parts = text.split('|');
-  if(parts.length < 5) return false;
-  let id, total, idx, data, legacyName = null;
-  if(parts[0] === 'Q2'){
-    id = parts[1]; total = parseInt(parts[2],10); idx = parseInt(parts[3],10);
-    data = parts.slice(4).join('|');
-  } else {
-    id = parts[0]; total = parseInt(parts[1],10); idx = parseInt(parts[2],10);
-    legacyName = parts[3] || null; data = parts.slice(4).join('|');
-  }
-  if(isNaN(total) || isNaN(idx)) return false;
+  if(parts.length < 5){ return false; }
+  const [id, totalStr, idxStr, filename, ...rest] = parts;
+  const data = rest.join('|'); // in case base64 ever contained a pipe (it won't, but safe)
+  const total = parseInt(totalStr, 10);
+  const idx = parseInt(idxStr, 10);
+  if(isNaN(total) || isNaN(idx)){ return false; }
 
-  ensureSession(id, total, legacyName);
+  ensureSession(id, total, filename);
   if(session.id !== id){
-    setStatus('That code belongs to a different sequence ('+id+') — ignored.', 'warn');
+    setStatus('That code belongs to a different sequence ('+id+') — ignored. Currently collecting '+session.id+'.', 'warn');
     return false;
   }
   if(!session.chunks.has(idx)){
     session.chunks.set(idx, data);
-    setStatus('Captured '+(idx+1)+' of '+total+'.', 'ok');
+    setStatus('Captured chunk '+(idx+1)+' of '+total+'.', 'ok');
     renderChunkGrid();
   }
   return true;
@@ -928,276 +665,129 @@ function completeSession(){
   let full = '';
   for(let i=0;i<session.total;i++) full += session.chunks.get(i);
   try{
-    let bytes = base64ToBytes(full);
-    if(bytes[0] === 0x1f && bytes[1] === 0x8b) bytes = pako.ungzip(bytes);
-    let files = parseContainer(bytes);
-    if(!files) files = [{ name: session.legacyName || 'recovered.pdf', bytes }];
+    const buf = base64ToArrayBuffer(full);
+    const blob = new Blob([buf], {type:'application/pdf'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.className = 'download-link';
+    a.href = url;
+    a.download = session.filename || 'recovered.pdf';
+    a.textContent = 'Download '+(session.filename || 'recovered.pdf');
     downloadArea.innerHTML = '';
-    files.forEach(f=>{
-      const blob = new Blob([f.bytes], { type:'application/pdf' });
-      const a = document.createElement('a');
-      a.className = 'download-link';
-      a.href = URL.createObjectURL(blob);
-      a.download = f.name || 'recovered.pdf';
-      a.textContent = '↓ '+(f.name||'recovered.pdf')+'  ('+fmtKB(f.bytes.length)+')';
-      downloadArea.appendChild(a);
-    });
-    setStatus('All '+session.total+' codes received — '+files.length+' file(s) rebuilt.', 'ok');
+    downloadArea.appendChild(a);
+    setStatus('All '+session.total+' chunks received — PDF reassembled.', 'ok');
   }catch(err){
-    session.done = false;
-    setStatus('Reassembly failed ('+err.message+') — one code was probably misread. Reset the session and rescan.', 'err');
+    setStatus('Reassembly failed: the base64 data looks corrupted. Try rescanning.', 'warn');
   }
 }
 
-/* ---------------- camera ---------------- */
-startCamBtn.addEventListener('click', ()=>{ startCamera().catch(e=>{
-  setStatus('Unexpected failure starting the camera: '+e.name+' — '+e.message, 'err');
-  releaseStream(); startCamBtn.disabled = false; stopCamBtn.disabled = true;
-}); });
-stopCamBtn.addEventListener('click', stopCamera);
-document.getElementById('recheckBtn').addEventListener('click', ()=>{ fixViewportHeight(); runDiagnostics(); });
-
-function releaseStream(){
-  if(stream){ try{ stream.getTracks().forEach(t=>t.stop()); }catch(e){} stream = null; }
-  try{ video.srcObject = null; }catch(e){}
-}
-
-function withTimeout(promise, ms, label){
-  return Promise.race([
-    Promise.resolve(promise),
-    new Promise((_,rej)=>setTimeout(()=>rej(new Error(label+' timed out after '+ms+'ms')), ms))
-  ]);
-}
+/* camera */
+document.getElementById('startCamBtn').addEventListener('click', startCamera);
+document.getElementById('stopCamBtn').addEventListener('click', stopCamera);
 
 async function startCamera(){
   if(typeof jsQR !== 'function'){
-    setStatus('The QR-scanning library failed to load (jsQR missing) — usually a network/CDN issue. Reload the page.', 'warn');
+    setStatus('The QR-scanning library failed to load (jsQR is missing) — this is usually a network/CDN issue, not a camera problem. Check your internet connection and reload the page. "Upload QR image files" won\'t work either until this loads.', 'warn');
     return;
   }
   if(!window.isSecureContext){
-    setStatus('Camera blocked: this page is not on https:// or localhost. Host the file, or use “Upload QR image files” below.', 'warn');
+    setStatus('Camera access is blocked because this file is open from disk (file://) or a non-HTTPS address. Browsers only allow camera use on https:// pages or localhost. Host this file (e.g. a simple local web server, GitHub Pages, or any https site) and open it that way — or just use "Upload QR image files" below instead.', 'warn');
     return;
   }
   if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
-    setStatus('This browser exposes no camera API. Try Chrome, Safari or Firefox, or upload QR images.', 'warn');
+    setStatus('This browser does not support camera access. Try Chrome, Safari, or Firefox, or use "Upload QR image files" instead.', 'warn');
     return;
   }
-
-  startCamBtn.disabled = true;
-  setStatus('Requesting camera…', 'info');
-  fixViewportHeight();
-
-  /* --- 1. acquire the stream (back camera only, never {exact:…}) --- */
-  let s = null;
   try{
-    try{
-      s = await navigator.mediaDevices.getUserMedia({
-        video:{ facingMode:{ ideal:'environment' }, width:{ ideal:1920 }, height:{ ideal:1080 } }
-      });
-    }catch(inner){
-      if(['OverconstrainedError','ConstraintNotSatisfiedError','NotFoundError','TypeError','NotReadableError'].indexOf(inner.name) !== -1){
-        s = await navigator.mediaDevices.getUserMedia({ video:true });
-      } else throw inner;
+    stream = await navigator.mediaDevices.getUserMedia({
+      video: {
+        facingMode: { ideal: 'environment' },
+        width: { ideal: 1920 },
+        height: { ideal: 1080 },
+        advanced: [{ focusMode: 'continuous' }]
+      }
+    });
+    // some browsers only accept focusMode via applyConstraints after the stream starts
+    const track = stream.getVideoTracks()[0];
+    if(track && track.getCapabilities){
+      const caps = track.getCapabilities();
+      if(caps.focusMode && caps.focusMode.includes('continuous')){
+        try{ await track.applyConstraints({ advanced: [{ focusMode: 'continuous' }] }); }catch(e){}
+      }
     }
   }catch(err){
-    startCamBtn.disabled = false;
     if(err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError'){
-      let inIframe = false; try{ inIframe = window.self !== window.top; }catch(e){ inIframe = true; }
-      setStatus(inIframe
-        ? 'Camera blocked — this page is inside an embedded preview (iframe). Iframes block the camera no matter what your browser permission says. Open the page in its own tab.'
-        : 'Permission reported as denied. Reload the page, press Start camera and accept the prompt. If your browser says it is allowed, check the OS-level camera permission for the browser app itself.', 'warn');
+      if(window.self !== window.top){
+        setStatus('Camera was blocked even though permission is granted — this page is likely running inside an embedded preview (an iframe, e.g. a chat app\'s inline file preview), and iframes block camera access by default regardless of your browser permission. Open this HTML file directly in its own browser tab (download it, then open the downloaded file\'s URL — or double-click it — rather than viewing it inside a preview pane) and try again. "Upload QR image files" works fine inside a preview in the meantime.', 'warn');
+      } else {
+        setStatus('The browser reported permission as denied even though it looks allowed in settings. Try: fully reload this page, or close and reopen the tab, then click Start camera again and accept the prompt if one appears. If it still fails, use "Upload QR image files" instead.', 'warn');
+      }
     } else if(err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError'){
-      setStatus('No camera reported. If this phone obviously has one, the OS is blocking the browser app: Android → Settings → Apps → [browser] → Permissions → Camera → Allow; iPhone → Settings → [browser] → Camera → Allow. Then fully close and reopen the browser.', 'warn');
+      setStatus('No camera was found on this device. Use "Upload QR image files" instead.', 'warn');
     } else if(err.name === 'NotReadableError'){
       setStatus('The camera is already in use by another app or tab. Close it and try again.', 'warn');
     } else {
-      setStatus('Could not access the camera ('+err.name+': '+err.message+'). You can upload QR images instead.', 'warn');
+      setStatus('Could not access the camera ('+err.message+'). You can upload QR images instead.', 'warn');
     }
-    runDiagnostics();
     return;
   }
-
-  stream = s;
-
-  /* --- 2. attach to the <video>. Hide the placeholder as soon as ANY
-           readiness signal fires, independent of play() resolving. --- */
-  const reveal = ()=>{ video.style.display = 'block'; vpIdle.style.display = 'none'; fixViewportHeight(); };
-  video.addEventListener('loadedmetadata', reveal, { once:true });
-  video.addEventListener('loadeddata',     reveal, { once:true });
-  video.addEventListener('playing',        reveal, { once:true });
-
-  try{
-    video.setAttribute('playsinline','');
-    video.setAttribute('webkit-playsinline','');
-    video.muted = true;
-    video.srcObject = stream;
-  }catch(e){
-    try{ video.src = URL.createObjectURL(stream); }catch(e2){}
-  }
-
-  /* --- 3. play() inside try/catch WITH a timeout, so a hang or a
-           rejection can never leave the camera on and the UI stuck. --- */
-  let playErr = null;
-  try{
-    await withTimeout(video.play(), 7000, 'video.play()');
-  }catch(e){
-    playErr = e;
-  }
-
-  if(playErr && video.readyState < 2){
-    // genuinely dead — release the camera instead of leaving it lit
-    releaseStream();
-    startCamBtn.disabled = false;
-    stopCamBtn.disabled = true;
-    video.style.display = 'none';
-    vpIdle.style.display = 'block';
-    setStatus('The camera opened but the video stream never started ('+playErr.message+'). This is usually an in-app browser or an autoplay restriction — try opening the page in Chrome/Safari directly, or use image upload.', 'err');
-    runDiagnostics();
-    return;
-  }
-  if(playErr) setStatus('Note: play() reported "'+playErr.message+'" but frames are arriving — continuing.', 'warn');
-
+  video.srcObject = stream;
   video.style.display = 'block';
-  vpIdle.style.display = 'none';
-  vpTools.style.display = 'flex';
-
-  /* --- 4. capability probing is fully isolated: on some phones
-           getCapabilities() exists but throws, and that must not
-           abort anything above. --- */
-  try{ setupCamTools(); }catch(e){ /* torch/zoom simply stay hidden */ }
-
-  stopCamBtn.disabled = false;
+  video.setAttribute('playsinline', true);
+  await video.play();
+  document.getElementById('startCamBtn').disabled = true;
+  document.getElementById('stopCamBtn').disabled = false;
   scanStartedAt = performance.now();
-  lastFrameCheck = 0; frames = 0; fpsMark = performance.now(); fps = 0;
-  fixViewportHeight();
-  runDiagnostics();
+  scanAttempts = 0;
+  lastFrameCheck = 0;
   scanLoop();
-}
-
-function setupCamTools(){
-  const track = stream && stream.getVideoTracks()[0];
-  const torchBtn  = document.getElementById('torchBtn');
-  const zoomWrap  = document.getElementById('zoomWrap');
-  const zoomRange = document.getElementById('zoomRange');
-  torchBtn.style.display = 'none';
-  zoomWrap.style.display = 'none';
-  if(!track || typeof track.getCapabilities !== 'function') return;
-
-  let caps = null;
-  try{ caps = track.getCapabilities(); }catch(e){ return; }
-  if(!caps) return;
-
-  try{
-    if(caps.focusMode && caps.focusMode.indexOf && caps.focusMode.indexOf('continuous') !== -1){
-      track.applyConstraints({ advanced:[{ focusMode:'continuous' }] }).catch(()=>{});
-    }
-  }catch(e){}
-
-  try{
-    if(caps.torch){
-      let on = false;
-      torchBtn.style.display = 'inline-block';
-      torchBtn.onclick = ()=>{
-        on = !on;
-        track.applyConstraints({ advanced:[{ torch:on }] })
-          .then(()=>{ torchBtn.textContent = on ? '🔦 Torch on' : '🔦 Torch'; })
-          .catch(()=>{ torchBtn.textContent = '🔦 unsupported'; });
-      };
-    }
-  }catch(e){}
-
-  try{
-    if(caps.zoom){
-      zoomWrap.style.display = 'block';
-      zoomRange.min = caps.zoom.min; zoomRange.max = caps.zoom.max;
-      zoomRange.step = caps.zoom.step || 0.1;
-      let cur = caps.zoom.min;
-      try{ cur = track.getSettings().zoom || caps.zoom.min; }catch(e){}
-      zoomRange.value = cur;
-      zoomRange.oninput = ()=>{
-        track.applyConstraints({ advanced:[{ zoom: parseFloat(zoomRange.value) }] }).catch(()=>{});
-      };
-    }
-  }catch(e){}
 }
 
 function stopCamera(){
   if(rafId) cancelAnimationFrame(rafId);
   rafId = null;
-  releaseStream();
-  video.style.display = 'none';
-  vpIdle.style.display = 'block';
-  vpTools.style.display = 'none';
-  viewportEl.classList.remove('locked');
-  vpHud.textContent = '';
-  try{ overlayCtx.clearRect(0,0,overlayEl.width,overlayEl.height); }catch(e){}
-  startCamBtn.disabled = false;
-  stopCamBtn.disabled  = true;
-}
-
-let lastFrameCheck = 0, scanStartedAt = 0, frames = 0, fpsMark = 0, fps = 0, lockUntil = 0;
-
-function drawLock(loc, sx, sy){
-  const boxW = viewportEl.clientWidth, boxH = viewportEl.clientHeight;
-  if(!boxW || !boxH) return;
-  if(overlayEl.width !== boxW || overlayEl.height !== boxH){
-    overlayEl.width = boxW; overlayEl.height = boxH;
+  if(stream){
+    stream.getTracks().forEach(t=>t.stop());
+    stream = null;
   }
-  overlayCtx.clearRect(0,0,boxW,boxH);
-  if(!loc) return;
-  const vw = video.videoWidth, vh = video.videoHeight;
-  if(!vw || !vh) return;
-  // the video fills the box exactly (width:100%, height:auto) — no crop, no letterbox
-  const k = boxW / vw;
-  const map = p => [ (p.x/sx)*k, (p.y/sy)*k ];
-  const pts = [loc.topLeftCorner, loc.topRightCorner, loc.bottomRightCorner, loc.bottomLeftCorner].map(map);
-  overlayCtx.beginPath();
-  overlayCtx.moveTo(pts[0][0], pts[0][1]);
-  for(let i=1;i<pts.length;i++) overlayCtx.lineTo(pts[i][0], pts[i][1]);
-  overlayCtx.closePath();
-  overlayCtx.strokeStyle = '#4ADE80';
-  overlayCtx.lineWidth = 3;
-  overlayCtx.stroke();
+  video.style.display = 'none';
+  document.getElementById('startCamBtn').disabled = false;
+  document.getElementById('stopCamBtn').disabled = true;
 }
+
+let lastFrameCheck = 0;
+let scanAttempts = 0;
+let scanStartedAt = 0;
 
 function scanLoop(){
   if(!stream) return;
-  if(video.readyState >= 2 && video.videoWidth){
+  if(video.readyState === video.HAVE_ENOUGH_DATA){
+    // downscale for speed — jsQR doesn't need full camera resolution to find a code
     const nativeW = video.videoWidth, nativeH = video.videoHeight;
-    const targetW = Math.min(900, nativeW);
+    const targetW = Math.min(720, nativeW);
     const scale = targetW / nativeW;
     scanCanvas.width = targetW;
     scanCanvas.height = Math.round(nativeH * scale);
     scanCtx.drawImage(video, 0, 0, scanCanvas.width, scanCanvas.height);
     const imageData = scanCtx.getImageData(0, 0, scanCanvas.width, scanCanvas.height);
-    const code = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts:'dontInvert' });
-
-    frames++;
-    const now = performance.now();
-    if(now - fpsMark > 500){ fps = Math.round(frames * 1000 / (now - fpsMark)); frames = 0; fpsMark = now; }
-
+    const code = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: 'dontInvert' });
+    scanAttempts++;
     if(code && code.data){
       handleDecodedText(code.data);
-      lockUntil = now + 250;
-      viewportEl.classList.add('locked');
-      drawLock(code.location, scale, scale);
     } else {
-      if(now > lockUntil){ viewportEl.classList.remove('locked'); drawLock(null); }
-      if(now - lastFrameCheck > 400){
+      const now = performance.now();
+      if(now - lastFrameCheck > 400){ // throttle UI updates, not the scan itself
         lastFrameCheck = now;
         if(!session || session.chunks.size === 0){
           const secs = Math.round((now - scanStartedAt)/1000);
-          let msg = '🔍 Scanning — camera active, no code detected yet ('+secs+'s).';
-          if(secs > 8) msg += ' Move closer, hold steadier, raise screen brightness, or slow the player down / lower bytes per QR code.';
+          let msg = '🔍 Scanning — camera is active, no code detected yet ('+secs+'s).';
+          if(secs > 8){
+            msg += ' If this keeps up: move closer, hold steadier, improve lighting, or lower "Bytes per QR code" on the encode tab so the pattern is less dense.';
+          }
           setStatus(msg, 'info');
         }
       }
     }
-    vpHud.textContent = nativeW+'×'+nativeH+' · '+fps+' fps · '
-      + (viewportEl.classList.contains('locked') ? 'LOCKED' : 'searching')
-      + (session ? ' · '+session.chunks.size+'/'+session.total : '');
-  } else {
-    vpHud.textContent = 'waiting for frames… readyState '+video.readyState;
   }
   rafId = requestAnimationFrame(scanLoop);
 }
@@ -1207,7 +797,6 @@ document.getElementById('imgInput').addEventListener('change', (e)=>{
   const files = Array.from(e.target.files || []);
   files.forEach(file=>{
     const img = new Image();
-    const url = URL.createObjectURL(file);
     img.onload = ()=>{
       const c = document.createElement('canvas');
       c.width = img.width; c.height = img.height;
@@ -1215,18 +804,16 @@ document.getElementById('imgInput').addEventListener('change', (e)=>{
       ctx.drawImage(img, 0, 0);
       const imageData = ctx.getImageData(0,0,c.width,c.height);
       const code = jsQR(imageData.data, imageData.width, imageData.height);
-      if(code && code.data) handleDecodedText(code.data);
-      else setStatus('No QR code found in '+file.name+'.', 'warn');
-      URL.revokeObjectURL(url);
+      if(code && code.data){
+        handleDecodedText(code.data);
+      } else {
+        setStatus('No QR code found in '+file.name+'.', 'warn');
+      }
     };
-    img.onerror = ()=>{ setStatus('Could not read '+file.name+' as an image.', 'warn'); URL.revokeObjectURL(url); };
-    img.src = url;
+    img.src = URL.createObjectURL(file);
   });
   e.target.value = '';
 });
-
-renderFileList();
-runDiagnostics();
 </script>
 </body>
 </html>
