@@ -142,17 +142,17 @@
   .qr-cell canvas, .qr-cell img{max-width:100%; height:auto;}
   .qr-cell .ph{color:#DAD6C8; font-size:11px; padding-top:70px;}
 
-  /* ---- viewport: NO aspect-ratio (unsupported in some embedded webviews).
-         padding-top percentage hack + JS pixel fallback. ---- */
+  /* ---- viewport: the video is a NORMAL in-flow block (width:100%, height:auto),
+         exactly like the version confirmed working on-device. The wrapper takes
+         its height FROM the video, so there is no percentage-height chain that
+         can collapse to zero. Overlays sit on top, absolutely positioned. ---- */
   .viewport{
     position:relative; width:100%; max-width:460px; margin:16px auto 0;
-    height:0; padding-top:75%;              /* 4:3 */
-    background:#0B0C0E; overflow:hidden; border:1px solid var(--line);
+    background:#0B0C0E; border:1px solid var(--line); font-size:0;
   }
-  .viewport.forced{height:auto; padding-top:0;}   /* JS fallback sets an explicit height */
   .viewport video{
-    position:absolute; top:0; left:0; width:100%; height:100%;
-    object-fit:cover; display:block; background:#0B0C0E;
+    display:block; width:100%; height:auto; max-width:100%;
+    background:#0B0C0E;
   }
   .viewport #overlay{position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none;}
   .viewport .brackets{position:absolute; top:10%; left:10%; right:10%; bottom:10%; pointer-events:none;}
@@ -163,9 +163,8 @@
   .viewport .brackets i:nth-child(4){bottom:0; right:0; border-left:none; border-top:none;}
   .viewport.locked .brackets i{border-color:#4ADE80;}
   .viewport .vp-idle{
-    position:absolute; top:0; left:0; right:0; bottom:0;
-    display:flex; align-items:center; justify-content:center;
-    color:#9B9A93; font-size:12.5px; text-align:center; padding:20px;
+    position:static; display:block; padding:64px 20px;
+    color:#9B9A93; font-size:12.5px; text-align:center; line-height:1.5;
   }
   .viewport .vp-hud{
     position:absolute; left:0; right:0; bottom:0; padding:6px 10px;
@@ -332,7 +331,7 @@
           <button class="secondary" id="recheckBtn">Re-check</button>
         </div>
         <div class="viewport" id="viewport">
-          <video id="video" playsinline webkit-playsinline muted autoplay></video>
+          <video id="video" playsinline webkit-playsinline muted autoplay style="display:none;"></video>
           <canvas id="overlay"></canvas>
           <div class="brackets"><i></i><i></i><i></i><i></i></div>
           <div class="vp-idle" id="vpIdle">Camera preview — press <b>Start camera</b></div>
@@ -377,7 +376,7 @@
    the browser is serving a CACHED copy and nothing you see
    reflects the current code.
    ========================================================= */
-const BUILD = 'B9 · 2026-09-19 · camera-hardening';
+const BUILD = 'B10 · 2026-09-19 · in-flow-video';
 document.getElementById('buildTag').textContent = 'build ' + BUILD;
 
 /* ================= tabs ================= */
@@ -737,14 +736,14 @@ document.addEventListener('keydown', (e)=>{
 
 /* ================= viewport sizing (no aspect-ratio dependency) ================= */
 const viewportEl = document.getElementById('viewport');
+/* The video now sizes the wrapper itself (width:100%, height:auto), so there is
+   nothing to force. This only keeps the overlay canvas matched to the box. */
 function fixViewportHeight(){
   try{
-    const w = viewportEl.clientWidth || viewportEl.getBoundingClientRect().width;
-    const h = viewportEl.clientHeight || viewportEl.getBoundingClientRect().height;
-    if(w > 0 && h < w * 0.5){
-      viewportEl.classList.add('forced');
-      viewportEl.style.height = Math.round(w * 0.75) + 'px';
-    }
+    const w = Math.round(viewportEl.clientWidth);
+    const h = Math.round(viewportEl.clientHeight);
+    const ov = document.getElementById('overlay');
+    if(ov && w && h && (ov.width !== w || ov.height !== h)){ ov.width = w; ov.height = h; }
   }catch(e){}
 }
 window.addEventListener('resize', fixViewportHeight);
@@ -1022,7 +1021,7 @@ async function startCamera(){
 
   /* --- 2. attach to the <video>. Hide the placeholder as soon as ANY
            readiness signal fires, independent of play() resolving. --- */
-  const reveal = ()=>{ vpIdle.style.display = 'none'; fixViewportHeight(); };
+  const reveal = ()=>{ video.style.display = 'block'; vpIdle.style.display = 'none'; fixViewportHeight(); };
   video.addEventListener('loadedmetadata', reveal, { once:true });
   video.addEventListener('loadeddata',     reveal, { once:true });
   video.addEventListener('playing',        reveal, { once:true });
@@ -1050,13 +1049,15 @@ async function startCamera(){
     releaseStream();
     startCamBtn.disabled = false;
     stopCamBtn.disabled = true;
-    vpIdle.style.display = 'flex';
+    video.style.display = 'none';
+    vpIdle.style.display = 'block';
     setStatus('The camera opened but the video stream never started ('+playErr.message+'). This is usually an in-app browser or an autoplay restriction — try opening the page in Chrome/Safari directly, or use image upload.', 'err');
     runDiagnostics();
     return;
   }
   if(playErr) setStatus('Note: play() reported "'+playErr.message+'" but frames are arriving — continuing.', 'warn');
 
+  video.style.display = 'block';
   vpIdle.style.display = 'none';
   vpTools.style.display = 'flex';
 
@@ -1124,7 +1125,8 @@ function stopCamera(){
   if(rafId) cancelAnimationFrame(rafId);
   rafId = null;
   releaseStream();
-  vpIdle.style.display = 'flex';
+  video.style.display = 'none';
+  vpIdle.style.display = 'block';
   vpTools.style.display = 'none';
   viewportEl.classList.remove('locked');
   vpHud.textContent = '';
@@ -1145,9 +1147,9 @@ function drawLock(loc, sx, sy){
   if(!loc) return;
   const vw = video.videoWidth, vh = video.videoHeight;
   if(!vw || !vh) return;
-  const cover = Math.max(boxW/vw, boxH/vh);
-  const dx = (boxW - vw*cover)/2, dy = (boxH - vh*cover)/2;
-  const map = p => [ (p.x/sx)*cover + dx, (p.y/sy)*cover + dy ];
+  // the video fills the box exactly (width:100%, height:auto) — no crop, no letterbox
+  const k = boxW / vw;
+  const map = p => [ (p.x/sx)*k, (p.y/sy)*k ];
   const pts = [loc.topLeftCorner, loc.topRightCorner, loc.bottomRightCorner, loc.bottomLeftCorner].map(map);
   overlayCtx.beginPath();
   overlayCtx.moveTo(pts[0][0], pts[0][1]);
