@@ -19,39 +19,68 @@
     --line:#DAD6C8;
     --cobalt:#24469B;
     --cobalt-dark:#182F6C;
+    --btn-fg:#FFFFFF;
     --amber:#B65C1E;
     --ok:#2C6E49;
     --err:#A32020;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper:#141519;
+      --surface:#1D1F24;
+      --ink:#E9E7E0;
+      --ink-soft:#A29F97;
+      --line:#34363C;
+      --cobalt:#8AA7EC;
+      --cobalt-dark:#A7BEF4;
+      --btn-fg:#12131A;
+      --amber:#E0A05A;
+      --ok:#6FCF97;
+      --err:#EC8A8A;
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#141519;
+    --surface:#1D1F24;
+    --ink:#E9E7E0;
+    --ink-soft:#A29F97;
+    --line:#34363C;
+    --cobalt:#8AA7EC;
+    --cobalt-dark:#A7BEF4;
+    --btn-fg:#12131A;
+    --amber:#E0A05A;
+    --ok:#6FCF97;
+    --err:#EC8A8A;
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
   body{
     background:var(--paper);
     color:var(--ink);
-    font-family:'IBM Plex Mono', monospace;
+    font-family:'IBM Plex Mono', monospace, monospace;
     font-size:14px;
     line-height:1.55;
     -webkit-font-smoothing:antialiased;
   }
   h1,h2,h3{
-    font-family:'Space Grotesk', sans-serif;
+    font-family:'Space Grotesk', system-ui, sans-serif;
     font-weight:600;
     margin:0 0 6px 0;
     letter-spacing:-0.01em;
   }
   .wrap{max-width:840px; margin:0 auto; padding:36px 20px 80px;}
   header.top{
-    display:flex; align-items:baseline; justify-content:space-between;
+    display:flex; align-items:baseline; justify-content:space-between; gap:12px;
     border-bottom:2px solid var(--ink); padding-bottom:14px; margin-bottom:24px;
   }
   header.top h1{font-size:22px;}
-  header.top .mark{font-size:12px; color:var(--ink-soft);}
+  header.top .mark{font-size:11.5px; color:var(--ink-soft); text-align:right;}
 
   .tabs{display:flex; margin-bottom:28px; border:1px solid var(--ink);}
   .tab{
     flex:1; text-align:center; padding:11px 8px; cursor:pointer;
     background:var(--surface); color:var(--ink-soft);
-    font-family:'Space Grotesk', sans-serif; font-weight:600; font-size:14px;
+    font-family:'Space Grotesk', system-ui, sans-serif; font-weight:600; font-size:14px;
     user-select:none; border-right:1px solid var(--ink);
   }
   .tab:last-child{border-right:none;}
@@ -69,7 +98,7 @@
     color:var(--ink-soft); margin-bottom:6px;
   }
   input[type="file"], input[type="number"], select{
-    width:100%; font-family:inherit; font-size:13px; padding:9px 10px;
+    width:100%; max-width:100%; font-family:inherit; font-size:13px; padding:9px 10px;
     background:var(--paper); border:1px solid var(--line); color:var(--ink);
   }
   input[type="number"]{max-width:160px;}
@@ -78,28 +107,28 @@
   .grid2{display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:16px;}
 
   button{
-    font-family:'Space Grotesk', sans-serif; font-weight:600; font-size:13.5px;
-    padding:11px 20px; background:var(--cobalt); color:#fff; border:none;
+    font-family:'Space Grotesk', system-ui, sans-serif; font-weight:600; font-size:13.5px;
+    padding:11px 20px; background:var(--cobalt); color:var(--btn-fg); border:none;
     cursor:pointer; letter-spacing:0.01em;
   }
   button:hover{background:var(--cobalt-dark);}
-  button:disabled{background:#B7B4A8; cursor:not-allowed;}
+  button:disabled{background:#B7B4A8; color:#3a3a36; cursor:not-allowed;}
   button.secondary{background:transparent; color:var(--cobalt); border:1.5px solid var(--cobalt);}
-  button.secondary:hover{background:#EDF0F8;}
+  button.secondary:hover{background:rgba(127,160,232,.14);}
   button.tiny{padding:4px 9px; font-size:11.5px;}
   .btn-row{display:flex; gap:10px; flex-wrap:wrap;}
 
-  .status{font-size:12.5px; padding:10px 12px; border-left:3px solid var(--line); background:var(--paper); margin-top:14px;}
+  .status{font-size:12.5px; padding:10px 12px; border-left:3px solid var(--line); background:var(--paper); margin-top:14px; word-break:break-word;}
   .status.warn{border-color:var(--amber); color:var(--amber);}
   .status.ok{border-color:var(--ok); color:var(--ok);}
   .status.info{border-color:var(--cobalt); color:var(--cobalt-dark);}
   .status.err{border-color:var(--err); color:var(--err);}
 
   .meta-line{color:var(--ink-soft); font-size:12.5px; margin-top:4px;}
-  .readout{font-size:12.5px; background:var(--paper); border:1px solid var(--line); padding:10px 12px; margin-top:6px;}
+  .readout{font-size:12.5px; background:var(--paper); border:1px solid var(--line); padding:10px 12px; margin-top:6px; overflow-x:auto;}
   .readout b{font-weight:600;}
+  .stamp{display:inline-block; font-size:11px; padding:2px 7px; border:1px solid var(--cobalt); color:var(--cobalt-dark); margin-bottom:8px;}
 
-  /* file list */
   .filelist{border:1px solid var(--line); margin-bottom:16px;}
   .filerow{display:flex; align-items:center; gap:10px; padding:8px 10px; border-bottom:1px solid var(--line); font-size:12.5px;}
   .filerow:last-child{border-bottom:none;}
@@ -109,24 +138,24 @@
 
   #qrGrid{display:grid; grid-template-columns:repeat(auto-fill, minmax(150px,1fr)); gap:14px; margin-top:18px;}
   .qr-cell{border:1px solid var(--line); background:#fff; padding:10px; text-align:center; min-height:180px;}
-  .qr-cell .idx{font-size:11px; color:var(--ink-soft); margin-top:6px;}
+  .qr-cell .idx{font-size:11px; color:#5B5A52; margin-top:6px;}
   .qr-cell canvas, .qr-cell img{max-width:100%; height:auto;}
-  .qr-cell .ph{color:var(--line); font-size:11px; padding-top:70px;}
+  .qr-cell .ph{color:#DAD6C8; font-size:11px; padding-top:70px;}
 
+  /* ---- viewport: NO aspect-ratio (unsupported in some embedded webviews).
+         padding-top percentage hack + JS pixel fallback. ---- */
   .viewport{
     position:relative; width:100%; max-width:460px; margin:16px auto 0;
-    background:#0B0C0E; overflow:hidden;
-    border:1px solid var(--line);
+    height:0; padding-top:75%;              /* 4:3 */
+    background:#0B0C0E; overflow:hidden; border:1px solid var(--line);
   }
-  /* padding-top percentage hack for the 4:3 box — works even where the CSS
-     aspect-ratio property doesn't (older or embedded mobile browsers) */
-  .viewport::before{ content:''; display:block; padding-top:75%; }
+  .viewport.forced{height:auto; padding-top:0;}   /* JS fallback sets an explicit height */
   .viewport video{
-    position:absolute; inset:0; width:100%; height:100%;
+    position:absolute; top:0; left:0; width:100%; height:100%;
     object-fit:cover; display:block; background:#0B0C0E;
   }
-  .viewport #overlay{position:absolute; inset:0; width:100%; height:100%; pointer-events:none;}
-  .viewport .brackets{position:absolute; inset:10%; pointer-events:none;}
+  .viewport #overlay{position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none;}
+  .viewport .brackets{position:absolute; top:10%; left:10%; right:10%; bottom:10%; pointer-events:none;}
   .viewport .brackets i{position:absolute; width:26px; height:26px; border:2.5px solid rgba(255,255,255,.85);}
   .viewport .brackets i:nth-child(1){top:0; left:0; border-right:none; border-bottom:none;}
   .viewport .brackets i:nth-child(2){top:0; right:0; border-left:none; border-bottom:none;}
@@ -134,7 +163,8 @@
   .viewport .brackets i:nth-child(4){bottom:0; right:0; border-left:none; border-top:none;}
   .viewport.locked .brackets i{border-color:#4ADE80;}
   .viewport .vp-idle{
-    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    position:absolute; top:0; left:0; right:0; bottom:0;
+    display:flex; align-items:center; justify-content:center;
     color:#9B9A93; font-size:12.5px; text-align:center; padding:20px;
   }
   .viewport .vp-hud{
@@ -150,17 +180,16 @@
     width:20px; height:20px; display:flex; align-items:center; justify-content:center;
     font-size:8.5px; border:1px solid var(--line); color:var(--ink-soft);
   }
-  .chunk-dot.got{background:var(--ok); border-color:var(--ok); color:#fff;}
+  .chunk-dot.got{background:var(--ok); border-color:var(--ok); color:#0f1a14;}
 
   a.download-link{
     display:inline-block; margin:8px 8px 0 0; padding:10px 18px;
-    background:var(--ok); color:#fff; text-decoration:none;
-    font-family:'Space Grotesk', sans-serif; font-weight:600; font-size:13px;
+    background:var(--ok); color:#0f1a14; text-decoration:none;
+    font-family:'Space Grotesk', system-ui, sans-serif; font-weight:600; font-size:13px;
   }
   footer{margin-top:40px; font-size:11.5px; color:var(--ink-soft); border-top:1px solid var(--line); padding-top:14px;}
 
-  /* play overlay */
-  #playOverlay{display:none; position:fixed; inset:0; background:#000; z-index:1000;
+  #playOverlay{display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:#000; z-index:1000;
     flex-direction:column; align-items:center; justify-content:center; padding:18px;}
   #playOverlay.active{display:flex;}
   #playStage{background:#fff; padding:18px; display:flex; align-items:center; justify-content:center;}
@@ -168,14 +197,14 @@
     width:min(80vw, 78vh); height:min(80vw, 78vh);
     image-rendering:pixelated; shape-rendering:crispEdges;
   }
-  #playInfo{color:#F6F5F1; font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:16px; margin-top:14px;}
+  #playInfo{color:#F6F5F1; font-family:'Space Grotesk',system-ui,sans-serif; font-weight:600; font-size:16px; margin-top:14px;}
   #playSub{color:#9B9A93; font-size:11.5px; margin-top:4px; text-align:center;}
   .play-controls{display:flex; align-items:center; gap:10px; margin-top:16px; flex-wrap:wrap; justify-content:center;}
   .play-controls select, .play-controls input[type=number]{
     font-family:inherit; font-size:12.5px; padding:8px 10px;
     background:#1E2019; color:#F6F5F1; border:1px solid #444; width:auto; max-width:120px;
   }
-  .play-controls button{border-color:#9B9A93; color:#F6F5F1; background:transparent; border:1.5px solid #9B9A93;}
+  .play-controls button{color:#F6F5F1; background:transparent; border:1.5px solid #9B9A93;}
   .play-controls button:hover{background:#2A2B2F;}
 
   @media print{
@@ -192,7 +221,7 @@
 
   <header class="top">
     <h1>PDF ⇄ QR</h1>
-    <div class="mark">offline &nbsp;·&nbsp; no upload</div>
+    <div class="mark">offline &nbsp;·&nbsp; no upload<br><span id="buildTag"></span></div>
   </header>
 
   <div class="tabs">
@@ -204,7 +233,7 @@
   <div class="panel active" id="panel-encode">
     <div class="card">
       <h2>1. Choose PDFs</h2>
-      <p class="sub">Add one or more files — they're packed into a single sequence, compressed, split across QR codes, and rebuilt on the other side. Compression typically cuts the number of codes by 20–60% on text-heavy PDFs.</p>
+      <p class="sub">Add one or more files — they're packed into a single sequence, compressed, split across QR codes, and rebuilt on the other side.</p>
       <form id="genForm">
         <div class="field">
           <label for="pdfInput">Add files</label>
@@ -292,7 +321,7 @@
   <div class="panel" id="panel-decode">
     <div class="card">
       <h2>1. Scan the codes</h2>
-      <p class="sub">Point your camera at the sequence — any order, repeats are ignored. Leave it running through a few loops of the player until every tile turns green.</p>
+      <p class="sub">Point your camera at the sequence — any order, repeats are ignored. Leave it running through a few loops until every tile turns green.</p>
 
       <div id="diagPanel" class="readout" style="margin-bottom:14px;"></div>
 
@@ -303,13 +332,13 @@
           <button class="secondary" id="recheckBtn">Re-check</button>
         </div>
         <div class="viewport" id="viewport">
-          <video id="video" playsinline muted></video>
+          <video id="video" playsinline webkit-playsinline muted autoplay></video>
           <canvas id="overlay"></canvas>
           <div class="brackets"><i></i><i></i><i></i><i></i></div>
           <div class="vp-idle" id="vpIdle">Camera preview — press <b>Start camera</b></div>
           <div class="vp-hud" id="vpHud"></div>
-          <canvas id="scanCanvas" style="display:none;"></canvas>
         </div>
+        <canvas id="scanCanvas" style="display:none;"></canvas>
         <div class="vp-tools" id="vpTools" style="display:none;">
           <button class="secondary tiny" id="torchBtn" style="display:none;">🔦 Torch</button>
           <label id="zoomWrap" style="display:none; flex:1; min-width:140px;">
@@ -342,6 +371,15 @@
 </div>
 
 <script>
+/* =========================================================
+   BUILD STAMP — bump this on every edit. If the number shown
+   in the header / diagnostics panel is not the latest one,
+   the browser is serving a CACHED copy and nothing you see
+   reflects the current code.
+   ========================================================= */
+const BUILD = 'B9 · 2026-09-19 · camera-hardening';
+document.getElementById('buildTag').textContent = 'build ' + BUILD;
+
 /* ================= tabs ================= */
 document.querySelectorAll('.tab').forEach(t=>{
   t.addEventListener('click', ()=>{
@@ -350,6 +388,7 @@ document.querySelectorAll('.tab').forEach(t=>{
     t.classList.add('active');
     document.getElementById('panel-'+t.dataset.tab).classList.add('active');
     if(t.dataset.tab === 'encode') stopCamera();
+    else fixViewportHeight();
   });
 });
 
@@ -375,12 +414,7 @@ function base64ToBytes(b64){
   return bytes;
 }
 
-/* ================= container format =================
-   [ "PQPDF2\n" ][ manifest JSON \n ][ file bytes concatenated ]
-   manifest = { f:[{n:name, s:size}, ...] }
-   whole container optionally gzipped, then base64, then split.
-   chunk payload = "Q2|id|total|idx|data"
-==================================================== */
+/* ================= container format ================= */
 function buildContainer(files){
   const enc = new TextEncoder();
   const manifest = JSON.stringify({ f: files.map(f=>({ n:f.name, s:f.bytes.length })) });
@@ -421,10 +455,9 @@ const compressSel  = document.getElementById('compress');
 const estimateEl   = document.getElementById('estimate');
 const genBtn       = document.getElementById('genBtn');
 
-let pendingFiles = [];   // {name, bytes}
-let qrPayloads   = [];   // payload strings for current sequence
+let pendingFiles = [];
+let qrPayloads   = [];
 let currentEcc   = 'L';
-let lastEstimate = null;
 
 document.getElementById('pdfInput').addEventListener('change', async (e)=>{
   const files = Array.from(e.target.files||[]);
@@ -438,13 +471,11 @@ document.getElementById('pdfInput').addEventListener('change', async (e)=>{
 });
 
 document.getElementById('clearBtn').addEventListener('click', ()=>{
-  pendingFiles = [];
-  qrPayloads = [];
+  pendingFiles = []; qrPayloads = [];
   qrGrid.innerHTML = '';
   resultCard.style.display='none';
   genStatus.innerHTML='';
-  renderFileList();
-  refreshEstimate();
+  renderFileList(); refreshEstimate();
 });
 
 function renderFileList(){
@@ -470,13 +501,10 @@ function renderFileList(){
   });
 }
 
-// how many bytes a QR code can hold at each ECC level (byte mode, version 40)
 const ECC_CAP = { L:2900, M:2300, Q:1600, H:1250 };
 
 function suggestChunk(b64len, ecc){
   const cap = ECC_CAP[ecc] || 2900;
-  // aim for a sequence that stays scannable: small payloads get big, easy codes;
-  // large payloads get denser codes so the count stays manageable.
   let s;
   if(b64len <= 4000)        s = 350;
   else if(b64len <= 15000)  s = 600;
@@ -486,7 +514,7 @@ function suggestChunk(b64len, ecc){
   return Math.max(100, Math.min(s, cap - 40));
 }
 
-let packCache = null;   // { key, payload, raw }
+let packCache = null;
 function packKey(){
   return pendingFiles.map(f=>f.name+':'+f.bytes.length).join('~') + '#' + compressSel.value;
 }
@@ -502,31 +530,24 @@ function packedSize(){
 }
 
 function refreshEstimate(){
-  if(!pendingFiles.length){
-    estimateEl.textContent = 'Add a file to see the estimate.';
-    return;
-  }
+  if(!pendingFiles.length){ estimateEl.textContent = 'Add a file to see the estimate.'; return; }
   const { payload, raw } = packedSize();
   const b64len = Math.ceil(payload.length/3)*4;
   const ecc = eccSel.value;
-  if(autoChunkBox.checked){
-    chunkInput.value = suggestChunk(b64len, ecc);
-  }
+  if(autoChunkBox.checked) chunkInput.value = suggestChunk(b64len, ecc);
   const cap = ECC_CAP[ecc] - 40;
   let chunk = parseInt(chunkInput.value,10) || 600;
   if(chunk > cap){ chunk = cap; if(autoChunkBox.checked) chunkInput.value = chunk; }
   const total = Math.ceil(b64len / chunk);
-  lastEstimate = { total, chunk, b64len };
 
   const saved = raw ? Math.round(100 - (payload.length/raw)*100) : 0;
-  const speedMs = 400;
-  const secs = Math.round(total * speedMs / 1000);
+  const secs = Math.round(total * 400 / 1000);
   let html = '<b>'+pendingFiles.length+'</b> file(s) · <b>'+fmtKB(raw)+'</b> raw'
     + (parseInt(compressSel.value,10) > 0 ? ' → <b>'+fmtKB(payload.length)+'</b> packed ('+saved+'% smaller)' : '')
     + ' · <b>'+total+'</b> QR code(s) at '+chunk+' bytes each'
     + '<br><span style="color:var(--ink-soft)">One full pass ≈ '+secs+'s at 400ms/frame, ≈ '+Math.round(total*0.1)+'s on turbo.</span>';
-  if(chunk > cap - 200) html += '<br><span style="color:var(--amber)">Near the QR capacity limit — codes will be very dense. Drop the chunk size if scanning struggles.</span>';
-  if(total > 300) html += '<br><span style="color:var(--amber)">'+total+' codes is a long transfer. Consider sending fewer files per batch.</span>';
+  if(chunk > cap - 200) html += '<br><span style="color:var(--amber)">Near the QR capacity limit — codes will be very dense.</span>';
+  if(total > 300) html += '<br><span style="color:var(--amber)">'+total+' codes is a long transfer.</span>';
   estimateEl.innerHTML = html;
 }
 
@@ -571,7 +592,6 @@ genForm.addEventListener('submit', (e)=>{
   }, 30);
 });
 
-/* lazy grid: only draw codes as they scroll into view, so 300+ codes stay smooth */
 let gridObserver = null;
 function renderGridLazy(id, total){
   if(gridObserver) gridObserver.disconnect();
@@ -585,12 +605,14 @@ function renderGridLazy(id, total){
     qrGrid.appendChild(cell);
     cells.push(cell);
   }
-  gridObserver = new IntersectionObserver((entries)=>{
-    entries.forEach(en=>{
-      if(en.isIntersecting){ drawCell(en.target); gridObserver.unobserve(en.target); }
-    });
-  }, { rootMargin:'300px' });
-  cells.forEach(c=>gridObserver.observe(c));
+  if('IntersectionObserver' in window){
+    gridObserver = new IntersectionObserver((entries)=>{
+      entries.forEach(en=>{ if(en.isIntersecting){ drawCell(en.target); gridObserver.unobserve(en.target); } });
+    }, { rootMargin:'300px' });
+    cells.forEach(c=>gridObserver.observe(c));
+  } else {
+    cells.forEach(drawCell);
+  }
 }
 function drawCell(cell){
   if(cell.dataset.drawn) return;
@@ -638,7 +660,7 @@ const playPauseBtn = document.getElementById('playPauseBtn');
 const playSub      = document.getElementById('playSub');
 
 let playIdx = 0, playTimer = null, playRunning = false, playLoops = 0;
-const frameCache = new Map();   // idx -> detached node
+const frameCache = new Map();
 const CACHE_MAX = 24;
 
 function frameNode(i){
@@ -655,7 +677,6 @@ function renderPlayFrame(){
   playStage.innerHTML = '';
   playStage.appendChild(node);
   playInfo.textContent = (playIdx+1)+' / '+qrPayloads.length + (playLoops ? '   · loop '+(playLoops+1) : '');
-  // warm the next frame so fast speeds don't stutter
   const nxt = (playIdx+1) % qrPayloads.length;
   if(!frameCache.has(nxt)) setTimeout(()=>frameNode(nxt), 0);
 }
@@ -684,7 +705,7 @@ document.getElementById('playBtn').addEventListener('click', ()=>{
   playIdx = 0; playLoops = 0;
   frameCache.clear();
   playOverlay.classList.add('active');
-  playSub.textContent = 'Point the other device\'s camera at this screen — it can pick codes up in any order, so just let it loop.';
+  playSub.textContent = 'Point the other device\'s camera at this screen — any order, so just let it loop.';
   renderPlayFrame();
   startPlayTimer();
 });
@@ -702,7 +723,7 @@ document.getElementById('playPrevBtn').addEventListener('click', ()=>{
   playIdx = (playIdx-1+qrPayloads.length) % qrPayloads.length; renderPlayFrame(); if(playRunning) startPlayTimer();
 });
 playSpeedSel.addEventListener('change', ()=>{
-  playCustom.style.display = playSpeedSel.value === 'custom' ? 'block' : 'none';
+  playCustom.style.display = playSpeedSel.value === 'custom' ? 'inline-block' : 'none';
   if(playRunning) startPlayTimer();
 });
 playCustom.addEventListener('change', ()=>{ if(playRunning) startPlayTimer(); });
@@ -714,17 +735,48 @@ document.addEventListener('keydown', (e)=>{
   if(e.key === 'ArrowLeft')  document.getElementById('playPrevBtn').click();
 });
 
+/* ================= viewport sizing (no aspect-ratio dependency) ================= */
+const viewportEl = document.getElementById('viewport');
+function fixViewportHeight(){
+  try{
+    const w = viewportEl.clientWidth || viewportEl.getBoundingClientRect().width;
+    const h = viewportEl.clientHeight || viewportEl.getBoundingClientRect().height;
+    if(w > 0 && h < w * 0.5){
+      viewportEl.classList.add('forced');
+      viewportEl.style.height = Math.round(w * 0.75) + 'px';
+    }
+  }catch(e){}
+}
+window.addEventListener('resize', fixViewportHeight);
+window.addEventListener('orientationchange', ()=>setTimeout(fixViewportHeight, 300));
+setTimeout(fixViewportHeight, 0);
+setTimeout(fixViewportHeight, 600);
+
 /* ================= environment diagnostics ================= */
 const diagPanel = document.getElementById('diagPanel');
 
+function detectInApp(){
+  const ua = navigator.userAgent || '';
+  const hits = [];
+  if(/FBAN|FBAV|FB_IAB/i.test(ua)) hits.push('Facebook');
+  if(/Instagram/i.test(ua)) hits.push('Instagram');
+  if(/WhatsApp/i.test(ua)) hits.push('WhatsApp');
+  if(/Line\//i.test(ua)) hits.push('LINE');
+  if(/Snapchat/i.test(ua)) hits.push('Snapchat');
+  if(/Twitter/i.test(ua)) hits.push('X/Twitter');
+  if(/TikTok|musical_ly|BytedanceWebview/i.test(ua)) hits.push('TikTok');
+  if(/; wv\)/i.test(ua)) hits.push('Android WebView');
+  if(/Telegram/i.test(ua)) hits.push('Telegram');
+  return hits;
+}
+
 async function runDiagnostics(){
-  const inIframe = window.self !== window.top;
+  const inIframe = (function(){ try{ return window.self !== window.top; }catch(e){ return true; } })();
   const proto    = location.protocol;
-  const secure   = window.isSecureContext;
+  const secure   = !!window.isSecureContext;
   const hasAPI   = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
   const libs     = { QRCode: typeof QRCode !== 'undefined', jsQR: typeof jsQR === 'function', pako: typeof pako !== 'undefined' };
-  const ua = navigator.userAgent || '';
-  const inAppMatch = ua.match(/FBAN|FBAV|Instagram|Line\/|MicroMessenger|TikTok|Snapchat|Twitter|Pinterest|GSA\/|WhatsApp/i);
+  const inApp    = detectInApp();
 
   let perm = 'unknown';
   try{
@@ -734,52 +786,56 @@ async function runDiagnostics(){
     }
   }catch(e){ perm = 'not reportable'; }
 
-  let camCount = null;
+  let camCount = 'not checked', camLabels = '';
   if(hasAPI && navigator.mediaDevices.enumerateDevices){
-    try{ camCount = (await navigator.mediaDevices.enumerateDevices()).filter(d=>d.kind==='videoinput').length; }
-    catch(e){}
+    try{
+      const devs = (await navigator.mediaDevices.enumerateDevices()).filter(d=>d.kind === 'videoinput');
+      camCount = devs.length;
+      camLabels = devs.map(d=>d.label).filter(Boolean).join(' / ');
+    }catch(e){ camCount = 'enumerateDevices failed ('+e.name+')'; }
   }
 
   const yes = '<span style="color:var(--ok)">ok</span>';
   const no  = '<span style="color:var(--err)">no</span>';
   const rows = [
-    ['Page address', proto + (inIframe ? ' (inside an embedded preview)' : '')],
+    ['Page address', proto + '//' + location.host + (inIframe ? ' (inside an embedded preview)' : '')],
     ['Secure context (https/localhost)', secure ? yes : no],
     ['Embedded in iframe', inIframe ? '<span style="color:var(--err)">yes — blocks camera</span>' : yes],
-    ['Browser', inAppMatch ? '<span style="color:var(--err)">in-app browser detected ('+inAppMatch[0]+')</span>' : 'regular browser'],
+    ['In-app browser', inApp.length ? '<span style="color:var(--amber)">'+inApp.join(', ')+'</span>' : 'no'],
     ['getUserMedia available', hasAPI ? yes : no],
-    ['Cameras detected', camCount === null ? 'unknown (needs permission first)' : (camCount > 0 ? camCount+' found' : '<span style="color:var(--err)">0 — none reported</span>')],
     ['Camera permission', perm],
-    ['Libraries', (libs.QRCode?'QRCode '+yes:'QRCode '+no)+' · '+(libs.jsQR?'jsQR '+yes:'jsQR '+no)+' · '+(libs.pako?'pako '+yes:'pako '+no)]
+    ['Cameras reported', camCount + (camLabels ? ' — '+camLabels : '')],
+    ['Libraries', (libs.QRCode?'QRCode '+yes:'QRCode '+no)+' · '+(libs.jsQR?'jsQR '+yes:'jsQR '+no)+' · '+(libs.pako?'pako '+yes:'pako '+no)],
+    ['Viewport box', Math.round(viewportEl.clientWidth)+'×'+Math.round(viewportEl.clientHeight)+' px'],
+    ['Video state', 'readyState '+video.readyState+' · '+(video.videoWidth||0)+'×'+(video.videoHeight||0)+' · paused '+video.paused]
   ];
-  let html = '<b>Environment check</b><br>' + rows.map(r=>r[0]+': '+r[1]).join('<br>');
+  let html = '<div class="stamp">build '+BUILD+'</div><br><b>Environment check</b><br>' + rows.map(r=>r[0]+': '+r[1]).join('<br>');
 
   const blockers = [];
-  if(!secure) blockers.push('This page is not in a secure context ('+proto+'). Browsers only allow the camera on <b>https://</b> or <b>localhost</b> — opening the file by double-clicking it (file://) will never work. Run a local server: <code>python3 -m http.server 8000</code> in the file\'s folder, then open <code>http://localhost:8000/pdf-qr-bridge.html</code>.');
-  if(inIframe) blockers.push('The page is inside an embedded preview. Iframes block camera access no matter what your browser settings say — open the file in its own browser tab.');
-  if(inAppMatch) blockers.push('This looks like it\'s opened inside another app\'s built-in browser ('+inAppMatch[0]+') rather than Chrome/Safari/Firefox directly. These in-app browsers frequently block or fake camera access even when everything else looks fine. Tap the "⋯" or share menu in that app and choose "Open in Browser" / "Open in Safari" / "Open in Chrome", then try again there.');
+  if(!secure) blockers.push('Not a secure context ('+proto+'). Browsers only allow the camera on <b>https://</b> or <b>localhost</b>. Opening the file by double-clicking (file://) will never work. Run <code>python3 -m http.server 8000</code> in the file\'s folder and open <code>http://localhost:8000/pdf-qr-bridge.html</code>.');
+  if(inIframe) blockers.push('The page is inside an embedded preview. Iframes block camera access regardless of browser settings — open it in its own tab.');
+  if(inApp.length) blockers.push('You appear to be in an in-app browser ('+inApp.join(', ')+'). These often block or silently break camera access — tap the ⋯ menu and choose "Open in browser".');
   if(!hasAPI) blockers.push('This browser exposes no getUserMedia API at all.');
-  if(camCount === 0 && perm === 'granted'){
-    blockers.push('This is the telltale combination: the <b>website</b> permission shows granted, but the browser still reports zero cameras. That almost always means the phone\'s <b>operating system</b> is blocking the browser app from the camera at a level above the website — a separate switch from the popup you already accepted here. On Android: Settings → Apps → (your browser, e.g. Chrome) → Permissions → Camera → set to Allow. On iPhone: Settings → (your browser, e.g. Safari) → Camera → set to Allow, or Settings → Privacy & Security → Camera → enable it for that browser. After changing it, fully close and reopen the browser app (not just the tab), then reload this page.');
-  } else if(camCount === 0){
-    blockers.push('The browser reports zero cameras. If this is a phone, that almost always means the browser itself (see above) is blocking camera enumeration, not that the hardware is missing.');
-  }
+  if(camCount === 0) blockers.push('The browser reports <b>0 cameras</b> while permission is '+perm+'. That combination means the phone\'s OS is blocking the browser app itself, not the page. Android: Settings → Apps → [browser] → Permissions → Camera → Allow. iPhone: Settings → [browser] → Camera → Allow. Then fully close and reopen the browser app — a tab reload is not enough.');
   if(!libs.jsQR) blockers.push('jsQR did not load (CDN blocked or offline) — scanning cannot run until it does.');
 
   if(blockers.length){
-    html += '<br><br><span style="color:var(--amber)"><b>Why the camera won\'t open:</b></span><br>• ' + blockers.join('<br>• ');
+    html += '<br><br><span style="color:var(--amber)"><b>Likely blockers:</b></span><br>• ' + blockers.join('<br>• ');
   } else {
     html += '<br><br><span style="color:var(--ok)">Nothing is blocking the camera — press Start camera and accept the prompt.</span>';
   }
   diagPanel.innerHTML = html;
 }
-document.getElementById('recheckBtn').addEventListener('click', runDiagnostics);
-runDiagnostics();
 
 /* ================= DECODE ================= */
 const video        = document.getElementById('video');
 const scanCanvas   = document.getElementById('scanCanvas');
 const scanCtx      = scanCanvas.getContext('2d', { willReadFrequently:true });
+const overlayEl    = document.getElementById('overlay');
+const overlayCtx   = overlayEl.getContext('2d');
+const vpIdle       = document.getElementById('vpIdle');
+const vpHud        = document.getElementById('vpHud');
+const vpTools      = document.getElementById('vpTools');
 const scanStatus   = document.getElementById('scanStatus');
 const chunkGrid    = document.getElementById('chunkGrid');
 const progressBar  = document.getElementById('progressBar');
@@ -787,9 +843,11 @@ const progressFill = document.getElementById('progressFill');
 const progressLabel= document.getElementById('progressLabel');
 const downloadArea = document.getElementById('downloadArea');
 const resetRow     = document.getElementById('resetRow');
+const startCamBtn  = document.getElementById('startCamBtn');
+const stopCamBtn   = document.getElementById('stopCamBtn');
 
 let stream = null, rafId = null;
-let session = null;   // {id, total, chunks:Map, legacyName, done}
+let session = null;
 
 function setStatus(msg, kind){
   scanStatus.innerHTML = '<div class="status '+(kind||'info')+'">'+msg+'</div>';
@@ -809,7 +867,6 @@ function ensureSession(id, total, legacyName){
   resetRow.style.display = 'flex';
 }
 
-let gridDirty = false;
 function renderChunkGrid(){
   if(!session){ chunkGrid.innerHTML=''; progressBar.style.display='none'; progressLabel.style.display='none'; return; }
   progressBar.style.display = 'block';
@@ -823,8 +880,7 @@ function renderChunkGrid(){
     }
   }
   for(let i=0;i<session.total;i++){
-    const d = chunkGrid.children[i];
-    if(session.chunks.has(i)) d.classList.add('got');
+    if(session.chunks.has(i)) chunkGrid.children[i].classList.add('got');
   }
   const pct = Math.round(100 * session.chunks.size / session.total);
   progressFill.style.width = pct+'%';
@@ -845,13 +901,11 @@ function missingList(){
 function handleDecodedText(text){
   const parts = text.split('|');
   if(parts.length < 5) return false;
-
   let id, total, idx, data, legacyName = null;
   if(parts[0] === 'Q2'){
     id = parts[1]; total = parseInt(parts[2],10); idx = parseInt(parts[3],10);
     data = parts.slice(4).join('|');
   } else {
-    // old format: id|total|idx|filename|data
     id = parts[0]; total = parseInt(parts[1],10); idx = parseInt(parts[2],10);
     legacyName = parts[3] || null; data = parts.slice(4).join('|');
   }
@@ -859,7 +913,7 @@ function handleDecodedText(text){
 
   ensureSession(id, total, legacyName);
   if(session.id !== id){
-    setStatus('That code belongs to a different sequence ('+id+') — ignored. Currently collecting '+session.id+'.', 'warn');
+    setStatus('That code belongs to a different sequence ('+id+') — ignored.', 'warn');
     return false;
   }
   if(!session.chunks.has(idx)){
@@ -876,14 +930,9 @@ function completeSession(){
   for(let i=0;i<session.total;i++) full += session.chunks.get(i);
   try{
     let bytes = base64ToBytes(full);
-    // gzip magic
-    if(bytes[0] === 0x1f && bytes[1] === 0x8b){
-      bytes = pako.ungzip(bytes);
-    }
+    if(bytes[0] === 0x1f && bytes[1] === 0x8b) bytes = pako.ungzip(bytes);
     let files = parseContainer(bytes);
-    if(!files){
-      files = [{ name: session.legacyName || 'recovered.pdf', bytes }];
-    }
+    if(!files) files = [{ name: session.legacyName || 'recovered.pdf', bytes }];
     downloadArea.innerHTML = '';
     files.forEach(f=>{
       const blob = new Blob([f.bytes], { type:'application/pdf' });
@@ -897,314 +946,266 @@ function completeSession(){
     setStatus('All '+session.total+' codes received — '+files.length+' file(s) rebuilt.', 'ok');
   }catch(err){
     session.done = false;
-    setStatus('Reassembly failed ('+err.message+') — one of the codes was probably misread. Reset the session and rescan.', 'err');
+    setStatus('Reassembly failed ('+err.message+') — one code was probably misread. Reset the session and rescan.', 'err');
   }
 }
 
-/* camera */
-document.getElementById('startCamBtn').addEventListener('click', startCamera);
-document.getElementById('stopCamBtn').addEventListener('click', stopCamera);
+/* ---------------- camera ---------------- */
+startCamBtn.addEventListener('click', ()=>{ startCamera().catch(e=>{
+  setStatus('Unexpected failure starting the camera: '+e.name+' — '+e.message, 'err');
+  releaseStream(); startCamBtn.disabled = false; stopCamBtn.disabled = true;
+}); });
+stopCamBtn.addEventListener('click', stopCamera);
+document.getElementById('recheckBtn').addEventListener('click', ()=>{ fixViewportHeight(); runDiagnostics(); });
 
-let camStarting = false;
-let stallTimer = null;
-let currentFacing = 'environment'; // 'environment' = back, 'user' = front
-let currentDeviceId = null;        // set when picked explicitly from the dropdown
-
-function buildConstraints(){
-  const base = { width:{ ideal:1920 }, height:{ ideal:1080 }, advanced:[{ focusMode:'continuous' }] };
-  if(currentDeviceId) return { ...base, deviceId:{ exact: currentDeviceId } };
-  // 'ideal' (not 'exact') here — many mobile browsers don't reliably support exact facingMode
-  // and throw NotFoundError instead of gracefully degrading. 'ideal' still strongly prefers
-  // the back camera but won't hard-fail if the device can't prove an exact match.
-  return { ...base, facingMode:{ ideal: currentFacing } };
+function releaseStream(){
+  if(stream){ try{ stream.getTracks().forEach(t=>t.stop()); }catch(e){} stream = null; }
+  try{ video.srcObject = null; }catch(e){}
 }
 
-async function openStream(){
-  // try the exact request first (correct camera matters more than the ideal resolution)
-  try{
-    return await navigator.mediaDevices.getUserMedia({ video: buildConstraints() });
-  }catch(inner){
-    if(inner.name === 'OverconstrainedError' || inner.name === 'ConstraintNotSatisfiedError'){
-      // exact facingMode/deviceId not satisfiable — fall back to "ideal" so we at least get a camera
-      const relaxed = currentDeviceId
-        ? { deviceId:{ ideal: currentDeviceId }, width:{ ideal:1920 }, height:{ ideal:1080 } }
-        : { facingMode:{ ideal: currentFacing }, width:{ ideal:1920 }, height:{ ideal:1080 } };
-      try{ return await navigator.mediaDevices.getUserMedia({ video: relaxed }); }
-      catch(inner2){ return await navigator.mediaDevices.getUserMedia({ video: true }); }
-    }
-    if(inner.name === 'NotFoundError'){
-      return await navigator.mediaDevices.getUserMedia({ video: true });
-    }
-    throw inner;
-  }
+function withTimeout(promise, ms, label){
+  return Promise.race([
+    Promise.resolve(promise),
+    new Promise((_,rej)=>setTimeout(()=>rej(new Error(label+' timed out after '+ms+'ms')), ms))
+  ]);
 }
 
 async function startCamera(){
-  if(camStarting) return;
-  if(stream){ setStatus('Camera is already running.', 'info'); return; }
-  camStarting = true;
-  document.getElementById('startCamBtn').disabled = true;
-
   if(typeof jsQR !== 'function'){
-    camStarting = false;
-    document.getElementById('startCamBtn').disabled = false;
-    setStatus('The QR-scanning library failed to load (jsQR is missing) — usually a network/CDN issue. Check your connection and reload. Image upload won\'t work either until this loads.', 'warn');
+    setStatus('The QR-scanning library failed to load (jsQR missing) — usually a network/CDN issue. Reload the page.', 'warn');
     return;
   }
   if(!window.isSecureContext){
-    camStarting = false;
-    document.getElementById('startCamBtn').disabled = false;
-    setStatus('Camera access is blocked because this page is open from disk (file://) or a non-HTTPS address. Browsers only allow the camera on https:// or localhost. Host the file (local web server, GitHub Pages, any https site) — or use “Upload QR image files” below.', 'warn');
+    setStatus('Camera blocked: this page is not on https:// or localhost. Host the file, or use “Upload QR image files” below.', 'warn');
     return;
   }
   if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
-    camStarting = false;
-    document.getElementById('startCamBtn').disabled = false;
-    setStatus('This browser does not support camera access. Try Chrome, Safari, or Firefox, or upload QR images instead.', 'warn');
+    setStatus('This browser exposes no camera API. Try Chrome, Safari or Firefox, or upload QR images.', 'warn');
     return;
   }
+
+  startCamBtn.disabled = true;
+  setStatus('Requesting camera…', 'info');
+  fixViewportHeight();
+
+  /* --- 1. acquire the stream (back camera only, never {exact:…}) --- */
+  let s = null;
   try{
-    stream = await openStream();
     try{
-      const track = stream.getVideoTracks()[0];
-      if(track && track.getCapabilities){
-        const caps = track.getCapabilities();
-        if(caps.focusMode && caps.focusMode.includes('continuous')){
-          try{ await track.applyConstraints({ advanced:[{ focusMode:'continuous' }] }); }catch(e){}
-        }
-        if(track.getSettings && track.getSettings().facingMode) currentFacing = track.getSettings().facingMode;
-      }
-    }catch(capErr){
-      // some browsers expose getCapabilities/getSettings but throw when actually called —
-      // that's cosmetic (autofocus/facingMode reporting), never a reason to abandon a working stream
+      s = await navigator.mediaDevices.getUserMedia({
+        video:{ facingMode:{ ideal:'environment' }, width:{ ideal:1920 }, height:{ ideal:1080 } }
+      });
+    }catch(inner){
+      if(['OverconstrainedError','ConstraintNotSatisfiedError','NotFoundError','TypeError','NotReadableError'].indexOf(inner.name) !== -1){
+        s = await navigator.mediaDevices.getUserMedia({ video:true });
+      } else throw inner;
     }
-    runDiagnostics();
   }catch(err){
-    camStarting = false;
-    document.getElementById('startCamBtn').disabled = false;
-    if(stream){ stream.getTracks().forEach(t=>t.stop()); stream = null; } // release the camera light if we got this far
+    startCamBtn.disabled = false;
     if(err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError'){
-      if(window.self !== window.top){
-        setStatus('Camera blocked — this page is running inside an embedded preview (iframe), and iframes block camera access regardless of your browser permission. Open the HTML file directly in its own tab and try again. Image upload works fine in a preview.', 'warn');
-      } else {
-        setStatus('Permission reported as denied. Reload the page or reopen the tab, then press Start camera and accept the prompt. Otherwise use image upload.', 'warn');
-      }
+      let inIframe = false; try{ inIframe = window.self !== window.top; }catch(e){ inIframe = true; }
+      setStatus(inIframe
+        ? 'Camera blocked — this page is inside an embedded preview (iframe). Iframes block the camera no matter what your browser permission says. Open the page in its own tab.'
+        : 'Permission reported as denied. Reload the page, press Start camera and accept the prompt. If your browser says it is allowed, check the OS-level camera permission for the browser app itself.', 'warn');
     } else if(err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError'){
-      const inAppMatch = (navigator.userAgent||'').match(/FBAN|FBAV|Instagram|Line\/|MicroMessenger|TikTok|Snapchat|Twitter|Pinterest|GSA\/|WhatsApp/i);
-      if(inAppMatch){
-        setStatus('No camera found — this page looks like it\'s open inside '+inAppMatch[0]+'\'s built-in browser, which often blocks camera access entirely. Use that app\'s share/menu button to "Open in Browser" (Chrome/Safari) and try again there, or use "Upload QR image files" here in the meantime.', 'warn');
-      } else {
-        (async ()=>{
-          let permState = 'unknown';
-          try{ if(navigator.permissions?.query) permState = (await navigator.permissions.query({name:'camera'})).state; }catch(e){}
-          if(permState === 'granted'){
-            setStatus('The website permission shows granted, but the phone reports zero cameras — that\'s the OS itself blocking the browser app from the camera, a level above the website popup. On Android: Settings → Apps → your browser → Permissions → Camera → Allow. On iPhone: Settings → your browser → Camera → Allow (or Settings → Privacy & Security → Camera). Then fully close and reopen the browser app and reload this page.', 'warn');
-          } else {
-            setStatus('The browser reports no camera on this device. Re-check the diagnostics above, or use “Upload QR image files” instead.', 'warn');
-          }
-        })();
-      }
-      runDiagnostics();
+      setStatus('No camera reported. If this phone obviously has one, the OS is blocking the browser app: Android → Settings → Apps → [browser] → Permissions → Camera → Allow; iPhone → Settings → [browser] → Camera → Allow. Then fully close and reopen the browser.', 'warn');
     } else if(err.name === 'NotReadableError'){
       setStatus('The camera is already in use by another app or tab. Close it and try again.', 'warn');
-    } else if(err.name === 'OverconstrainedError'){
-      setStatus('This device has no camera matching that request — try the camera picker above or “Upload QR image files” instead.', 'warn');
     } else {
-      setStatus('Could not access the camera ('+err.message+'). You can upload QR images instead.', 'warn');
+      setStatus('Could not access the camera ('+err.name+': '+err.message+'). You can upload QR images instead.', 'warn');
     }
+    runDiagnostics();
     return;
   }
+
+  stream = s;
+
+  /* --- 2. attach to the <video>. Hide the placeholder as soon as ANY
+           readiness signal fires, independent of play() resolving. --- */
+  const reveal = ()=>{ vpIdle.style.display = 'none'; fixViewportHeight(); };
+  video.addEventListener('loadedmetadata', reveal, { once:true });
+  video.addEventListener('loadeddata',     reveal, { once:true });
+  video.addEventListener('playing',        reveal, { once:true });
+
   try{
+    video.setAttribute('playsinline','');
+    video.setAttribute('webkit-playsinline','');
+    video.muted = true;
     video.srcObject = stream;
-    video.setAttribute('playsinline', true);
-    const playResult = video.play();
-    const timeout = new Promise((_, rej)=> setTimeout(()=>rej(new Error('timed out waiting for the camera picture')), 5000));
-    await Promise.race([playResult, timeout]);
-  }catch(playErr){
-    if(stream){ stream.getTracks().forEach(t=>t.stop()); stream = null; }
-    setStatus('The camera stream opened but the preview would not start ('+playErr.message+'). This sometimes happens after switching apps or tabs, or from a cached old copy of this page — try a hard refresh (or an incognito/private tab) and press Start camera again.', 'warn');
-    document.getElementById('startCamBtn').disabled = false;
-    camStarting = false;
+  }catch(e){
+    try{ video.src = URL.createObjectURL(stream); }catch(e2){}
+  }
+
+  /* --- 3. play() inside try/catch WITH a timeout, so a hang or a
+           rejection can never leave the camera on and the UI stuck. --- */
+  let playErr = null;
+  try{
+    await withTimeout(video.play(), 7000, 'video.play()');
+  }catch(e){
+    playErr = e;
+  }
+
+  if(playErr && video.readyState < 2){
+    // genuinely dead — release the camera instead of leaving it lit
+    releaseStream();
+    startCamBtn.disabled = false;
+    stopCamBtn.disabled = true;
+    vpIdle.style.display = 'flex';
+    setStatus('The camera opened but the video stream never started ('+playErr.message+'). This is usually an in-app browser or an autoplay restriction — try opening the page in Chrome/Safari directly, or use image upload.', 'err');
+    runDiagnostics();
     return;
   }
-  document.getElementById('vpIdle').style.display = 'none';
-  document.getElementById('vpTools').style.display = 'flex';
-  setupCamTools();
-  // safety net: if the preview box still has no visible height (rare, very old/odd
-  // browser CSS support), force one so the picture isn't playing invisibly
-  const vpBox = document.getElementById('viewport');
-  if(vpBox && vpBox.clientHeight < 40){
-    vpBox.style.height = Math.round(vpBox.clientWidth * 0.75) + 'px';
-  }
-  document.getElementById('startCamBtn').disabled = true;
-  document.getElementById('stopCamBtn').disabled = false;
+  if(playErr) setStatus('Note: play() reported "'+playErr.message+'" but frames are arriving — continuing.', 'warn');
+
+  vpIdle.style.display = 'none';
+  vpTools.style.display = 'flex';
+
+  /* --- 4. capability probing is fully isolated: on some phones
+           getCapabilities() exists but throws, and that must not
+           abort anything above. --- */
+  try{ setupCamTools(); }catch(e){ /* torch/zoom simply stay hidden */ }
+
+  stopCamBtn.disabled = false;
   scanStartedAt = performance.now();
-  lastFrameCheck = 0;
-  camStarting = false;
-
-  // watchdog: if the video never actually produces frames, say so instead of hanging silently
-  clearTimeout(stallTimer);
-  stallTimer = setTimeout(()=>{
-    if(stream && video.readyState < video.HAVE_ENOUGH_DATA){
-      setStatus('The camera opened but no picture is coming through. Try Stop camera, then Start again — or switch camera in the picker above if you have more than one.', 'warn');
-    }
-  }, 4000);
-
+  lastFrameCheck = 0; frames = 0; fpsMark = performance.now(); fps = 0;
+  fixViewportHeight();
+  runDiagnostics();
   scanLoop();
 }
 
-/* torch + zoom, where the device supports them */
 function setupCamTools(){
   const track = stream && stream.getVideoTracks()[0];
-  const torchBtn = document.getElementById('torchBtn');
-  const zoomWrap = document.getElementById('zoomWrap');
+  const torchBtn  = document.getElementById('torchBtn');
+  const zoomWrap  = document.getElementById('zoomWrap');
   const zoomRange = document.getElementById('zoomRange');
   torchBtn.style.display = 'none';
   zoomWrap.style.display = 'none';
-  if(!track || !track.getCapabilities) return;
-  let caps = {};
+  if(!track || typeof track.getCapabilities !== 'function') return;
+
+  let caps = null;
   try{ caps = track.getCapabilities(); }catch(e){ return; }
-  if(caps.torch){
-    let on = false;
-    torchBtn.style.display = 'inline-block';
-    torchBtn.onclick = async ()=>{
-      on = !on;
-      try{ await track.applyConstraints({ advanced:[{ torch:on }] }); torchBtn.textContent = on ? '🔦 Torch on' : '🔦 Torch'; }
-      catch(e){ torchBtn.textContent = '🔦 unsupported'; }
-    };
-  }
-  if(caps.zoom){
-    zoomWrap.style.display = 'block';
-    zoomRange.min = caps.zoom.min; zoomRange.max = caps.zoom.max;
-    zoomRange.step = caps.zoom.step || 0.1;
-    zoomRange.value = track.getSettings().zoom || caps.zoom.min;
-    zoomRange.oninput = ()=>{
-      try{ track.applyConstraints({ advanced:[{ zoom: parseFloat(zoomRange.value) }] }); }catch(e){}
-    };
-  }
+  if(!caps) return;
+
+  try{
+    if(caps.focusMode && caps.focusMode.indexOf && caps.focusMode.indexOf('continuous') !== -1){
+      track.applyConstraints({ advanced:[{ focusMode:'continuous' }] }).catch(()=>{});
+    }
+  }catch(e){}
+
+  try{
+    if(caps.torch){
+      let on = false;
+      torchBtn.style.display = 'inline-block';
+      torchBtn.onclick = ()=>{
+        on = !on;
+        track.applyConstraints({ advanced:[{ torch:on }] })
+          .then(()=>{ torchBtn.textContent = on ? '🔦 Torch on' : '🔦 Torch'; })
+          .catch(()=>{ torchBtn.textContent = '🔦 unsupported'; });
+      };
+    }
+  }catch(e){}
+
+  try{
+    if(caps.zoom){
+      zoomWrap.style.display = 'block';
+      zoomRange.min = caps.zoom.min; zoomRange.max = caps.zoom.max;
+      zoomRange.step = caps.zoom.step || 0.1;
+      let cur = caps.zoom.min;
+      try{ cur = track.getSettings().zoom || caps.zoom.min; }catch(e){}
+      zoomRange.value = cur;
+      zoomRange.oninput = ()=>{
+        track.applyConstraints({ advanced:[{ zoom: parseFloat(zoomRange.value) }] }).catch(()=>{});
+      };
+    }
+  }catch(e){}
 }
 
 function stopCamera(){
-  camStarting = false;
-  currentDeviceId = null;
-  currentFacing = 'environment';
-  clearTimeout(stallTimer);
   if(rafId) cancelAnimationFrame(rafId);
   rafId = null;
-  if(stream){ stream.getTracks().forEach(t=>t.stop()); stream = null; }
-  const idle = document.getElementById('vpIdle');
-  if(idle) idle.style.display = 'flex';
-  const tools = document.getElementById('vpTools');
-  if(tools) tools.style.display = 'none';
-  const vp = document.getElementById('viewport');
-  if(vp) vp.classList.remove('locked');
-  const hud = document.getElementById('vpHud');
-  if(hud) hud.textContent = '';
-  const ov = document.getElementById('overlay');
-  if(ov){ const c = ov.getContext('2d'); c && c.clearRect(0,0,ov.width,ov.height); }
-  document.getElementById('startCamBtn').disabled = false;
-  document.getElementById('stopCamBtn').disabled  = true;
+  releaseStream();
+  vpIdle.style.display = 'flex';
+  vpTools.style.display = 'none';
+  viewportEl.classList.remove('locked');
+  vpHud.textContent = '';
+  try{ overlayCtx.clearRect(0,0,overlayEl.width,overlayEl.height); }catch(e){}
+  startCamBtn.disabled = false;
+  stopCamBtn.disabled  = true;
 }
 
-let lastFrameCheck = 0, scanStartedAt = 0;
-let fpsCount = 0, fpsStamp = 0, fpsVal = 0, lockUntil = 0;
+let lastFrameCheck = 0, scanStartedAt = 0, frames = 0, fpsMark = 0, fps = 0, lockUntil = 0;
 
-const overlay = document.getElementById('overlay');
-const overlayCtx = overlay.getContext('2d');
-const viewportEl = document.getElementById('viewport');
-const hudEl = document.getElementById('vpHud');
-
-/* map a point from the downscaled scan canvas onto the on-screen preview,
-   accounting for object-fit: cover cropping */
-function drawLock(loc, scanScale){
+function drawLock(loc, sx, sy){
+  const boxW = viewportEl.clientWidth, boxH = viewportEl.clientHeight;
+  if(!boxW || !boxH) return;
+  if(overlayEl.width !== boxW || overlayEl.height !== boxH){
+    overlayEl.width = boxW; overlayEl.height = boxH;
+  }
+  overlayCtx.clearRect(0,0,boxW,boxH);
+  if(!loc) return;
   const vw = video.videoWidth, vh = video.videoHeight;
-  const dw = overlay.clientWidth, dh = overlay.clientHeight;
-  if(!vw || !dw) return;
-  if(overlay.width !== dw || overlay.height !== dh){ overlay.width = dw; overlay.height = dh; }
-  const cover = Math.max(dw/vw, dh/vh);
-  const offX = (dw - vw*cover)/2, offY = (dh - vh*cover)/2;
-  const map = p => [ (p.x/scanScale)*cover + offX, (p.y/scanScale)*cover + offY ];
-
-  overlayCtx.clearRect(0,0,dw,dh);
+  if(!vw || !vh) return;
+  const cover = Math.max(boxW/vw, boxH/vh);
+  const dx = (boxW - vw*cover)/2, dy = (boxH - vh*cover)/2;
+  const map = p => [ (p.x/sx)*cover + dx, (p.y/sy)*cover + dy ];
   const pts = [loc.topLeftCorner, loc.topRightCorner, loc.bottomRightCorner, loc.bottomLeftCorner].map(map);
   overlayCtx.beginPath();
-  pts.forEach((p,i)=> i ? overlayCtx.lineTo(p[0],p[1]) : overlayCtx.moveTo(p[0],p[1]));
+  overlayCtx.moveTo(pts[0][0], pts[0][1]);
+  for(let i=1;i<pts.length;i++) overlayCtx.lineTo(pts[i][0], pts[i][1]);
   overlayCtx.closePath();
   overlayCtx.strokeStyle = '#4ADE80';
   overlayCtx.lineWidth = 3;
   overlayCtx.stroke();
-  overlayCtx.fillStyle = 'rgba(74,222,128,.18)';
-  overlayCtx.fill();
-}
-function clearLock(){
-  if(overlay.width) overlayCtx.clearRect(0,0,overlay.width,overlay.height);
 }
 
 function scanLoop(){
   if(!stream) return;
-  if(video.readyState === video.HAVE_ENOUGH_DATA){
-    // belt-and-suspenders: if we're actually receiving frames, the idle placeholder
-    // and tools row must not still be showing, regardless of what happened earlier
-    const idle = document.getElementById('vpIdle');
-    if(idle && idle.style.display !== 'none') idle.style.display = 'none';
-    const tools = document.getElementById('vpTools');
-    if(tools && tools.style.display === 'none') tools.style.display = 'flex';
+  if(video.readyState >= 2 && video.videoWidth){
     const nativeW = video.videoWidth, nativeH = video.videoHeight;
     const targetW = Math.min(900, nativeW);
-    const scanScale = targetW / nativeW;
+    const scale = targetW / nativeW;
     scanCanvas.width = targetW;
-    scanCanvas.height = Math.round(nativeH * scanScale);
+    scanCanvas.height = Math.round(nativeH * scale);
     scanCtx.drawImage(video, 0, 0, scanCanvas.width, scanCanvas.height);
     const imageData = scanCtx.getImageData(0, 0, scanCanvas.width, scanCanvas.height);
     const code = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts:'dontInvert' });
 
+    frames++;
     const now = performance.now();
-    fpsCount++;
-    if(now - fpsStamp > 500){ fpsVal = Math.round(fpsCount*1000/(now-fpsStamp)); fpsCount = 0; fpsStamp = now; }
+    if(now - fpsMark > 500){ fps = Math.round(frames * 1000 / (now - fpsMark)); frames = 0; fpsMark = now; }
 
     if(code && code.data){
-      drawLock(code.location, scanScale);
-      viewportEl.classList.add('locked');
-      lockUntil = now + 350;
       handleDecodedText(code.data);
+      lockUntil = now + 250;
+      viewportEl.classList.add('locked');
+      drawLock(code.location, scale, scale);
     } else {
-      if(now > lockUntil){ clearLock(); viewportEl.classList.remove('locked'); }
+      if(now > lockUntil){ viewportEl.classList.remove('locked'); drawLock(null); }
       if(now - lastFrameCheck > 400){
         lastFrameCheck = now;
         if(!session || session.chunks.size === 0){
           const secs = Math.round((now - scanStartedAt)/1000);
           let msg = '🔍 Scanning — camera active, no code detected yet ('+secs+'s).';
-          if(secs > 8) msg += ' Fill more of the frame with the code, hold steadier, raise screen brightness, or slow the player down / lower bytes per QR code.';
+          if(secs > 8) msg += ' Move closer, hold steadier, raise screen brightness, or slow the player down / lower bytes per QR code.';
           setStatus(msg, 'info');
         }
       }
     }
-
-    if(now - lastHud > 250){
-      lastHud = now;
-      const got = session ? session.chunks.size+'/'+session.total : '0';
-      hudEl.textContent = nativeW+'×'+nativeH+' · '+fpsVal+' fps · '
-        + (code && code.data ? 'LOCKED' : 'searching') + ' · captured '+got;
-    }
+    vpHud.textContent = nativeW+'×'+nativeH+' · '+fps+' fps · '
+      + (viewportEl.classList.contains('locked') ? 'LOCKED' : 'searching')
+      + (session ? ' · '+session.chunks.size+'/'+session.total : '');
+  } else {
+    vpHud.textContent = 'waiting for frames… readyState '+video.readyState;
   }
   rafId = requestAnimationFrame(scanLoop);
 }
-let lastHud = 0;
 
 /* image upload fallback */
-document.addEventListener('visibilitychange', ()=>{
-  if(document.visibilityState === 'visible' && stream){
-    const track = stream.getVideoTracks()[0];
-    if(track && track.readyState === 'ended'){
-      setStatus('The camera stream ended while the app was in the background. Press Start camera to resume.', 'warn');
-      stopCamera();
-    }
-  }
-});
 document.getElementById('imgInput').addEventListener('change', (e)=>{
   const files = Array.from(e.target.files || []);
   files.forEach(file=>{
     const img = new Image();
+    const url = URL.createObjectURL(file);
     img.onload = ()=>{
       const c = document.createElement('canvas');
       c.width = img.width; c.height = img.height;
@@ -1214,14 +1215,16 @@ document.getElementById('imgInput').addEventListener('change', (e)=>{
       const code = jsQR(imageData.data, imageData.width, imageData.height);
       if(code && code.data) handleDecodedText(code.data);
       else setStatus('No QR code found in '+file.name+'.', 'warn');
-      URL.revokeObjectURL(img.src);
+      URL.revokeObjectURL(url);
     };
-    img.src = URL.createObjectURL(file);
+    img.onerror = ()=>{ setStatus('Could not read '+file.name+' as an image.', 'warn'); URL.revokeObjectURL(url); };
+    img.src = url;
   });
   e.target.value = '';
 });
 
 renderFileList();
+runDiagnostics();
 </script>
 </body>
 </html>
