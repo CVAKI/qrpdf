@@ -3,303 +3,267 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PDF ⇄ QR</title>
+<title>QrPDF — PDF ⇄ QR</title>
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="css/style.css">
+
+<!-- libraries (same three as the working version) -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script>
-<style>
-  :root{
-    --paper:#F6F5F1;
-    --surface:#FFFFFF;
-    --ink:#1E2019;
-    --ink-soft:#5B5A52;
-    --line:#DAD6C8;
-    --cobalt:#24469B;
-    --cobalt-dark:#182F6C;
-    --btn-fg:#FFFFFF;
-    --amber:#B65C1E;
-    --ok:#2C6E49;
-    --err:#A32020;
-  }
-  @media (prefers-color-scheme: dark){
-    :root:not([data-theme="light"]){
-      --paper:#141519;
-      --surface:#1D1F24;
-      --ink:#E9E7E0;
-      --ink-soft:#A29F97;
-      --line:#34363C;
-      --cobalt:#8AA7EC;
-      --cobalt-dark:#A7BEF4;
-      --btn-fg:#12131A;
-      --amber:#E0A05A;
-      --ok:#6FCF97;
-      --err:#EC8A8A;
-    }
-  }
-  :root[data-theme="dark"]{
-    --paper:#141519;
-    --surface:#1D1F24;
-    --ink:#E9E7E0;
-    --ink-soft:#A29F97;
-    --line:#34363C;
-    --cobalt:#8AA7EC;
-    --cobalt-dark:#A7BEF4;
-    --btn-fg:#12131A;
-    --amber:#E0A05A;
-    --ok:#6FCF97;
-    --err:#EC8A8A;
-  }
-  *{box-sizing:border-box;}
-  html,body{margin:0;padding:0;}
-  body{
-    background:var(--paper);
-    color:var(--ink);
-    font-family:'IBM Plex Mono', monospace, monospace;
-    font-size:14px;
-    line-height:1.55;
-    -webkit-font-smoothing:antialiased;
-  }
-  h1,h2,h3{
-    font-family:'Space Grotesk', system-ui, sans-serif;
-    font-weight:600;
-    margin:0 0 6px 0;
-    letter-spacing:-0.01em;
-  }
-  .wrap{max-width:840px; margin:0 auto; padding:36px 20px 80px;}
-  header.top{
-    display:flex; align-items:baseline; justify-content:space-between; gap:12px;
-    border-bottom:2px solid var(--ink); padding-bottom:14px; margin-bottom:24px;
-  }
-  header.top h1{font-size:22px;}
-  header.top .mark{font-size:11.5px; color:var(--ink-soft); text-align:right;}
-
-  .tabs{display:flex; margin-bottom:28px; border:1px solid var(--ink);}
-  .tab{
-    flex:1; text-align:center; padding:11px 8px; cursor:pointer;
-    background:var(--surface); color:var(--ink-soft);
-    font-family:'Space Grotesk', system-ui, sans-serif; font-weight:600; font-size:14px;
-    user-select:none; border-right:1px solid var(--ink);
-  }
-  .tab:last-child{border-right:none;}
-  .tab.active{background:var(--ink); color:var(--paper);}
-  .panel{display:none;}
-  .panel.active{display:block;}
-
-  .card{background:var(--surface); border:1px solid var(--line); padding:22px; margin-bottom:18px;}
-  .card h2{font-size:16px; margin-bottom:4px;}
-  .sub{color:var(--ink-soft); font-size:12.5px; margin-bottom:16px;}
-
-  .field{margin-bottom:16px;}
-  .field label{
-    display:block; font-size:12px; text-transform:uppercase; letter-spacing:0.06em;
-    color:var(--ink-soft); margin-bottom:6px;
-  }
-  input[type="file"], input[type="number"], select{
-    width:100%; max-width:100%; font-family:inherit; font-size:13px; padding:9px 10px;
-    background:var(--paper); border:1px solid var(--line); color:var(--ink);
-  }
-  input[type="number"]{max-width:160px;}
-  input[type="range"]{width:100%; accent-color:var(--cobalt);}
-
-  .grid2{display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:16px;}
-
-  button{
-    font-family:'Space Grotesk', system-ui, sans-serif; font-weight:600; font-size:13.5px;
-    padding:11px 20px; background:var(--cobalt); color:var(--btn-fg); border:none;
-    cursor:pointer; letter-spacing:0.01em;
-  }
-  button:hover{background:var(--cobalt-dark);}
-  button:disabled{background:#B7B4A8; color:#3a3a36; cursor:not-allowed;}
-  button.secondary{background:transparent; color:var(--cobalt); border:1.5px solid var(--cobalt);}
-  button.secondary:hover{background:rgba(127,160,232,.14);}
-  button.tiny{padding:4px 9px; font-size:11.5px;}
-  .btn-row{display:flex; gap:10px; flex-wrap:wrap;}
-
-  .status{font-size:12.5px; padding:10px 12px; border-left:3px solid var(--line); background:var(--paper); margin-top:14px; word-break:break-word;}
-  .status.warn{border-color:var(--amber); color:var(--amber);}
-  .status.ok{border-color:var(--ok); color:var(--ok);}
-  .status.info{border-color:var(--cobalt); color:var(--cobalt-dark);}
-  .status.err{border-color:var(--err); color:var(--err);}
-
-  .meta-line{color:var(--ink-soft); font-size:12.5px; margin-top:4px;}
-  .readout{font-size:12.5px; background:var(--paper); border:1px solid var(--line); padding:10px 12px; margin-top:6px; overflow-x:auto;}
-  .readout b{font-weight:600;}
-  .stamp{display:inline-block; font-size:11px; padding:2px 7px; border:1px solid var(--cobalt); color:var(--cobalt-dark); margin-bottom:8px;}
-
-  .filelist{border:1px solid var(--line); margin-bottom:16px;}
-  .filerow{display:flex; align-items:center; gap:10px; padding:8px 10px; border-bottom:1px solid var(--line); font-size:12.5px;}
-  .filerow:last-child{border-bottom:none;}
-  .filerow .nm{flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
-  .filerow .sz{color:var(--ink-soft); font-size:11.5px;}
-  .empty{padding:14px 10px; color:var(--ink-soft); font-size:12.5px;}
-
-  #qrGrid{display:grid; grid-template-columns:repeat(auto-fill, minmax(150px,1fr)); gap:14px; margin-top:18px;}
-  .qr-cell{border:1px solid var(--line); background:#fff; padding:10px; text-align:center; min-height:180px;}
-  .qr-cell .idx{font-size:11px; color:#5B5A52; margin-top:6px;}
-  .qr-cell canvas, .qr-cell img{max-width:100%; height:auto;}
-  .qr-cell .ph{color:#DAD6C8; font-size:11px; padding-top:70px;}
-
-  /* ---- viewport: the video is a NORMAL in-flow block (width:100%, height:auto),
-         exactly like the version confirmed working on-device. The wrapper takes
-         its height FROM the video, so there is no percentage-height chain that
-         can collapse to zero. Overlays sit on top, absolutely positioned. ---- */
-  .viewport{
-    position:relative; width:100%; max-width:460px; margin:16px auto 0;
-    background:#0B0C0E; border:1px solid var(--line); font-size:0;
-  }
-  .viewport video{
-    display:block; width:100%; height:auto; max-width:100%;
-    background:#0B0C0E;
-  }
-  .viewport #overlay{position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none;}
-  .viewport .brackets{position:absolute; top:10%; left:10%; right:10%; bottom:10%; pointer-events:none;}
-  .viewport .brackets i{position:absolute; width:26px; height:26px; border:2.5px solid rgba(255,255,255,.85);}
-  .viewport .brackets i:nth-child(1){top:0; left:0; border-right:none; border-bottom:none;}
-  .viewport .brackets i:nth-child(2){top:0; right:0; border-left:none; border-bottom:none;}
-  .viewport .brackets i:nth-child(3){bottom:0; left:0; border-right:none; border-top:none;}
-  .viewport .brackets i:nth-child(4){bottom:0; right:0; border-left:none; border-top:none;}
-  .viewport.locked .brackets i{border-color:#4ADE80;}
-  .viewport .vp-idle{
-    position:static; display:block; padding:64px 20px;
-    color:#9B9A93; font-size:12.5px; text-align:center; line-height:1.5;
-  }
-  .viewport .vp-hud{
-    position:absolute; left:0; right:0; bottom:0; padding:6px 10px;
-    background:rgba(11,12,14,.72); color:#E8E6DF; font-size:11px; letter-spacing:.04em;
-  }
-  .vp-tools{display:flex; gap:12px; align-items:center; max-width:460px; margin:10px auto 0; flex-wrap:wrap;}
-
-  .progress-bar{height:8px; background:var(--line); margin-top:12px; position:relative; overflow:hidden;}
-  .progress-bar > div{height:100%; background:var(--cobalt); width:0%; transition:width .15s ease;}
-  .chunk-grid{display:flex; flex-wrap:wrap; gap:4px; margin-top:12px;}
-  .chunk-dot{
-    width:20px; height:20px; display:flex; align-items:center; justify-content:center;
-    font-size:8.5px; border:1px solid var(--line); color:var(--ink-soft);
-  }
-  .chunk-dot.got{background:var(--ok); border-color:var(--ok); color:#0f1a14;}
-
-  a.download-link{
-    display:inline-block; margin:8px 8px 0 0; padding:10px 18px;
-    background:var(--ok); color:#0f1a14; text-decoration:none;
-    font-family:'Space Grotesk', system-ui, sans-serif; font-weight:600; font-size:13px;
-  }
-  footer{margin-top:40px; font-size:11.5px; color:var(--ink-soft); border-top:1px solid var(--line); padding-top:14px;}
-
-  #playOverlay{display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:#000; z-index:1000;
-    flex-direction:column; align-items:center; justify-content:center; padding:18px;}
-  #playOverlay.active{display:flex;}
-  #playStage{background:#fff; padding:18px; display:flex; align-items:center; justify-content:center;}
-  #playStage canvas, #playStage img{
-    width:min(80vw, 78vh); height:min(80vw, 78vh);
-    image-rendering:pixelated; shape-rendering:crispEdges;
-  }
-  #playInfo{color:#F6F5F1; font-family:'Space Grotesk',system-ui,sans-serif; font-weight:600; font-size:16px; margin-top:14px;}
-  #playSub{color:#9B9A93; font-size:11.5px; margin-top:4px; text-align:center;}
-  .play-controls{display:flex; align-items:center; gap:10px; margin-top:16px; flex-wrap:wrap; justify-content:center;}
-  .play-controls select, .play-controls input[type=number]{
-    font-family:inherit; font-size:12.5px; padding:8px 10px;
-    background:#1E2019; color:#F6F5F1; border:1px solid #444; width:auto; max-width:120px;
-  }
-  .play-controls button{color:#F6F5F1; background:transparent; border:1.5px solid #9B9A93;}
-  .play-controls button:hover{background:#2A2B2F;}
-
-  @media print{
-    header.top, .tabs, .card .sub, #genForm, footer, .no-print, .filelist{display:none !important;}
-    body{background:#fff;}
-    .wrap{max-width:none; padding:0;}
-    #qrGrid{grid-template-columns:repeat(2, 1fr); gap:24px;}
-    .qr-cell{break-inside:avoid; border:none;}
-  }
-</style>
 </head>
 <body>
-<div class="wrap">
 
-  <header class="top">
-    <h1>PDF ⇄ QR</h1>
-    <div class="mark">offline &nbsp;·&nbsp; no upload<br><span id="buildTag"></span></div>
+<!-- Inline icon sprite (replaces the lucide CDN; works offline) -->
+<svg class="sprite" aria-hidden="true" focusable="false">
+  <defs>
+    <symbol id="i-qr" viewBox="0 0 24 24"><rect width="5" height="5" x="3" y="3" rx="1"/><rect width="5" height="5" x="16" y="3" rx="1"/><rect width="5" height="5" x="3" y="16" rx="1"/><path d="M21 16h-3a2 2 0 0 0-2 2v3"/><path d="M21 21v.01"/><path d="M12 7v3a2 2 0 0 1-2 2H7"/><path d="M3 12h.01"/><path d="M12 3h.01"/><path d="M12 16v.01"/><path d="M16 12h1"/><path d="M21 12v.01"/><path d="M12 21v-1"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></symbol>
+    <symbol id="i-upload" viewBox="0 0 24 24"><path d="M4 14.9A7 7 0 1 1 15.7 8h1.8a4.5 4.5 0 0 1 2.5 8.2"/><path d="M12 12v9"/><path d="m16 16-4-4-4 4"/></symbol>
+    <symbol id="i-scan" viewBox="0 0 24 24"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/></symbol>
+    <symbol id="i-scan-line" viewBox="0 0 24 24"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M7 12h10"/></symbol>
+    <symbol id="i-file-plus" viewBox="0 0 24 24"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M9 15h6"/><path d="M12 18v-6"/></symbol>
+    <symbol id="i-zap" viewBox="0 0 24 24"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></symbol>
+    <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><polygon points="6 3 20 12 6 21 6 3"/></symbol>
+    <symbol id="i-grid" viewBox="0 0 24 24"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></symbol>
+    <symbol id="i-printer" viewBox="0 0 24 24"><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 9V3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v6"/><rect x="6" y="14" width="12" height="8" rx="1"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></symbol>
+    <symbol id="i-camera" viewBox="0 0 24 24"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></symbol>
+    <symbol id="i-camera-off" viewBox="0 0 24 24"><line x1="2" x2="22" y1="2" y2="22"/><path d="M7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9"/><path d="M9.5 4h5L17 7h3a2 2 0 0 1 2 2v7.5"/><path d="M14.12 15.12A3 3 0 1 1 9.88 10.88"/></symbol>
+    <symbol id="i-rotate" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></symbol>
+    <symbol id="i-zoom" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" x2="16.65" y1="21" y2="16.65"/><line x1="11" x2="11" y1="8" y2="14"/><line x1="8" x2="14" y1="11" y2="11"/></symbol>
+    <symbol id="i-image" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></symbol>
+    <symbol id="i-terminal" viewBox="0 0 24 24"><polyline points="4 17 10 11 4 5"/><line x1="12" x2="20" y1="19" y2="19"/></symbol>
+    <symbol id="i-skip-back" viewBox="0 0 24 24"><polygon points="19 20 9 12 19 4 19 20"/><line x1="5" x2="5" y1="19" y2="5"/></symbol>
+    <symbol id="i-skip-fwd" viewBox="0 0 24 24"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" x2="19" y1="5" y2="19"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></symbol>
+  </defs>
+</svg>
+
+<div class="app-shell">
+
+  <!-- ============ HEADER ============ -->
+  <header class="brand-header">
+    <div class="brand-title">
+      <div class="brand-glyph"><svg class="ic"><use href="#i-qr"/></svg></div>
+      <div class="brand-text">
+        <h1>Qr<span class="highlight">PDF</span></h1>
+        <div class="brand-tag"><span class="status-dot"></span> Air-gapped optical transfer</div>
+      </div>
+    </div>
+    <div class="meta-badges">
+      <div class="badge-secure"><svg class="ic ic-16"><use href="#i-shield"/></svg><span>100% client-side</span></div>
+      <div class="build-tag" id="buildTag"></div>
+    </div>
   </header>
 
-  <div class="tabs">
-    <div class="tab active" data-tab="encode">Encode PDF → QR</div>
-    <div class="tab" data-tab="decode">Scan QR → PDF</div>
-  </div>
+  <!-- ============ TABS ============ -->
+  <nav class="tab-nav">
+    <button type="button" class="tab active" data-tab="encode"><svg class="ic ic-18"><use href="#i-upload"/></svg><span>Encode PDF → QR</span></button>
+    <button type="button" class="tab" data-tab="decode"><svg class="ic ic-18"><use href="#i-scan"/></svg><span>Scan QR → PDF</span></button>
+  </nav>
 
-  <!-- ENCODE -->
-  <div class="panel active" id="panel-encode">
-    <div class="card">
-      <h2>1. Choose PDFs</h2>
-      <p class="sub">Add one or more files — they're packed into a single sequence, compressed, split across QR codes, and rebuilt on the other side.</p>
-      <form id="genForm">
-        <div class="field">
-          <label for="pdfInput">Add files</label>
-          <input type="file" id="pdfInput" accept="application/pdf,*/*" multiple>
+  <main class="panel-container">
+
+    <!-- ================================================= -->
+    <!-- ENCODE                                            -->
+    <!-- ================================================= -->
+    <section class="panel active" id="panel-encode">
+
+      <form id="genForm" class="stack">
+
+        <div class="card">
+          <div class="section-title"><span>Source documents</span><span class="step-pill">STEP 1</span></div>
+          <p class="sub">Add one or more files. They are packed into a single sequence, compressed, split across QR codes and rebuilt on the other side.</p>
+
+          <div class="dropzone" id="dropzoneBox">
+            <input type="file" id="pdfInput" accept="application/pdf,*/*" multiple>
+            <div class="dropzone-icon-ring"><svg class="ic"><use href="#i-file-plus"/></svg></div>
+            <div class="dropzone-text">Drop PDF files here or click to browse</div>
+            <div class="dropzone-hint">No server · no upload · everything stays in this tab</div>
+          </div>
+
+          <div class="filelist" id="fileList"><div class="empty">No files added yet.</div></div>
         </div>
 
-        <div class="filelist" id="fileList"><div class="empty">No files added yet.</div></div>
+        <div class="card">
+          <div class="section-title"><span>Chunking &amp; density</span><span class="step-pill">STEP 2</span></div>
 
-        <div class="grid2">
-          <div class="field">
-            <label for="chunkSize">Bytes per QR code</label>
-            <input type="number" id="chunkSize" value="400" min="100" max="900" step="25">
-            <div class="meta-line"><label style="display:inline; text-transform:none; letter-spacing:0;">
-              <input type="checkbox" id="autoChunk" checked style="width:auto;"> auto-suggest</label></div>
+          <div class="controls-grid">
+            <div class="input-field">
+              <label class="field-label" for="chunkSize">Bytes per QR code</label>
+              <input type="number" id="chunkSize" value="400" min="100" max="900" step="25">
+              <label class="checkbox-field"><input type="checkbox" id="autoChunk" checked><span>Auto-suggest</span></label>
+            </div>
+
+            <div class="input-field">
+              <label class="field-label" for="density">Scan speed / density</label>
+              <select id="density">
+                <option value="200">Easiest — 200 B (sparsest, grabs instantly)</option>
+                <option value="300">Easy — 300 B</option>
+                <option value="400" selected>Balanced — 400 B</option>
+                <option value="500">Compact — 500 B</option>
+                <option value="600">Densest — 600 B (fewest codes)</option>
+              </select>
+            </div>
+
+            <div class="input-field">
+              <label class="field-label" for="compress">Compression</label>
+              <select id="compress">
+                <option value="9" selected>gzip — maximum</option>
+                <option value="6">gzip — fast</option>
+                <option value="0">off (raw)</option>
+              </select>
+            </div>
           </div>
-          <div class="field">
-            <label for="density">Scan speed / density</label>
-            <select id="density">
-              <option value="200">Easiest — 200 B (sparsest, grabs instantly)</option>
-              <option value="300">Easy — 300 B</option>
-              <option value="400" selected>Balanced — 400 B</option>
-              <option value="500">Compact — 500 B</option>
-              <option value="600">Densest — 600 B (fewest codes)</option>
-            </select>
+
+          <div id="estimate">Add a file to see the estimate.</div>
+
+          <div class="btn-row" style="margin-top:1.25rem;">
+            <button type="submit" id="genBtn" class="btn-primary" disabled>
+              <svg class="ic ic-18"><use href="#i-zap"/></svg><span>Generate QR sequence</span>
+            </button>
+            <button type="button" id="clearBtn" class="btn-ghost">
+              <svg class="ic ic-16"><use href="#i-refresh"/></svg><span>Clear all</span>
+            </button>
           </div>
-          <div class="field">
-            <label for="compress">Compression</label>
-            <select id="compress">
-              <option value="9" selected>gzip — maximum</option>
-              <option value="6">gzip — fast</option>
-              <option value="0">off (raw)</option>
-            </select>
-          </div>
+
+          <div id="genStatus"><div class="status info">Ready. Add your files and press Generate.</div></div>
         </div>
 
-        <div class="readout" id="estimate">Add a file to see the estimate.</div>
-
-        <div class="btn-row" style="margin-top:16px;">
-          <button type="submit" id="genBtn" disabled>Generate QR sequence</button>
-          <button type="button" class="secondary" id="clearBtn">Clear all</button>
-        </div>
       </form>
-      <div id="genStatus"></div>
-    </div>
 
-    <div class="card no-print" id="resultCard" style="display:none;">
-      <h2>2. Your QR sequence</h2>
-      <p class="sub" id="resultSub"></p>
-      <div class="btn-row">
-        <button id="playBtn">▶ Play sequence</button>
-        <button class="secondary" id="renderAllBtn">Render all codes</button>
-        <button class="secondary" id="printBtn">Print / save as PDF</button>
-        <button class="secondary" id="dlAllBtn">Download all as PNGs</button>
+      <!-- RESULT (JS shows/hides via style.display) -->
+      <div class="card" id="resultCard" style="display:none;">
+        <div class="section-title"><span>Your QR sequence</span><span class="step-pill">STEP 3</span></div>
+        <p id="resultSub"></p>
+        <div class="btn-row">
+          <button type="button" id="playBtn" class="btn-primary"><svg class="ic ic-18"><use href="#i-play"/></svg><span>Play sequence</span></button>
+          <button type="button" id="renderAllBtn" class="btn-secondary"><svg class="ic ic-16"><use href="#i-grid"/></svg><span>Render all codes</span></button>
+          <button type="button" id="printBtn" class="btn-secondary"><svg class="ic ic-16"><use href="#i-printer"/></svg><span>Print / save as PDF</span></button>
+          <button type="button" id="dlAllBtn" class="btn-secondary"><svg class="ic ic-16"><use href="#i-download"/></svg><span>Download all as PNGs</span></button>
+        </div>
+        <div id="qrGrid"></div>
       </div>
-      <div id="qrGrid"></div>
+
+    </section>
+
+    <!-- ================================================= -->
+    <!-- DECODE                                            -->
+    <!-- ================================================= -->
+    <section class="panel" id="panel-decode">
+
+      <div class="card">
+        <div class="section-title"><span>Optical receiver</span><span class="step-pill">STEP 1</span></div>
+        <p class="sub">Point your camera at the sequence. Any order works and repeats are ignored. Leave it running through a few loops until every tile turns green.</p>
+
+        <!-- diagnostics: JS overwrites the class + text of #diagBar and toggles #logPanel via inline style -->
+        <div id="diagBar" class="status info">Checking environment…</div>
+        <div id="logPanel" style="display:none;">
+          <div class="btn-row">
+            <button type="button" class="btn-secondary btn-xs" id="copyLogBtn"><svg class="ic ic-16"><use href="#i-copy"/></svg><span>Copy logs</span></button>
+            <button type="button" class="btn-secondary btn-xs" id="clearLogBtn"><svg class="ic ic-16"><use href="#i-trash"/></svg><span>Clear</span></button>
+            <span id="copyLogMsg"></span>
+          </div>
+          <pre id="logBox"></pre>
+        </div>
+
+        <div id="mobileCamBlock" style="margin-top:1rem;">
+          <div class="btn-row">
+            <button type="button" id="startCamBtn" class="btn-primary btn-sm"><svg class="ic ic-16"><use href="#i-camera"/></svg><span>Start camera</span></button>
+            <button type="button" id="stopCamBtn" class="btn-secondary btn-sm" disabled><svg class="ic ic-16"><use href="#i-camera-off"/></svg><span>Stop camera</span></button>
+            <button type="button" id="recheckBtn" class="btn-secondary btn-sm"><svg class="ic ic-16"><use href="#i-rotate"/></svg><span>Re-check</span></button>
+          </div>
+
+          <div class="viewport" id="viewport">
+            <!-- video stays a normal in-flow block: do not position it absolutely -->
+            <video id="video" playsinline webkit-playsinline muted autoplay style="display:none;"></video>
+            <canvas id="overlay"></canvas>
+            <div class="brackets"><i></i><i></i><i></i><i></i></div>
+            <div class="scan-laser"></div>
+            <div class="vp-idle" id="vpIdle">
+              <svg class="ic"><use href="#i-scan-line"/></svg>
+              <div class="vp-idle-title">Camera standby</div>
+              <p>Point the camera at the sending device's QR playback.</p>
+              <button type="button" class="btn-primary" id="vpIdleBtn">Start camera</button>
+            </div>
+            <div class="vp-hud" id="vpHud"></div>
+          </div>
+          <canvas id="scanCanvas" style="display:none;"></canvas>
+
+          <div class="vp-tools" id="vpTools" style="display:none;">
+            <button type="button" class="btn-secondary btn-xs" id="torchBtn" style="display:none;">🔦 Torch</button>
+            <label id="zoomWrap" style="display:none;">
+              <span class="zoom-inner"><svg class="ic ic-16"><use href="#i-zoom"/></svg><span>Zoom</span><input type="range" id="zoomRange" min="1" max="5" step="0.1" value="1"></span>
+            </label>
+          </div>
+        </div>
+
+        <div class="import-row">
+          <div class="file-input-compact">
+            <button type="button" class="btn-secondary btn-xs"><svg class="ic ic-16"><use href="#i-image"/></svg><span>Import QR image files</span></button>
+            <input type="file" id="imgInput" accept="image/*" multiple>
+          </div>
+          <span class="import-hint">No camera? Upload screenshots or photos of the codes.</span>
+        </div>
+
+        <div id="scanStatus"><div class="status info">Sensor ready. Press Start camera to begin.</div></div>
+      </div>
+
+      <div class="card">
+        <div class="section-title"><span>Rebuild</span><span class="step-pill">STEP 2</span></div>
+        <div class="capture-hint">Each tile is one QR code. Green means it is stored in memory.</div>
+
+        <div id="progressBar" style="display:none;"><div id="progressFill"></div></div>
+        <div id="progressLabel" style="display:none;"></div>
+        <div class="chunk-grid" id="chunkGrid"></div>
+        <div id="downloadArea"></div>
+
+        <div class="btn-row" id="resetRow" style="display:none;">
+          <button type="button" class="btn-ghost" id="resetSessionBtn"><svg class="ic ic-16"><use href="#i-refresh"/></svg><span>Reset session</span></button>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <footer class="app-footer">
+    Everything runs locally in this page — files are never uploaded anywhere.<br>
+    QR generation: qrcodejs · scanning: jsQR · compression: pako
+  </footer>
+
+</div>
+
+<!-- ================================================= -->
+<!-- FULLSCREEN PLAYER                                 -->
+<!-- ================================================= -->
+<div id="playOverlay">
+  <div class="player-top-bar">
+    <div class="player-meta">
+      <div id="playInfo">1 / 1</div>
+      <div id="playSub">Point the other device's camera at this screen</div>
     </div>
+    <button type="button" id="playClose" title="Close player" aria-label="Close player"><svg class="ic"><use href="#i-x"/></svg></button>
   </div>
 
-  <!-- PLAY OVERLAY -->
-  <div id="playOverlay">
-    <div id="playStage"></div>
-    <div id="playInfo">1 / 1</div>
-    <div id="playSub">Point the other device's camera at this screen</div>
-    <div class="play-controls">
-      <button id="playPauseBtn">⏸ Pause</button>
-      <button id="playPrevBtn">◀</button>
-      <button id="playNextBtn">▶</button>
+  <div id="playStage"></div>
+
+  <div class="player-controls">
+    <div class="player-btn-group">
+      <button type="button" id="playPrevBtn" class="player-icon-btn" title="Previous" aria-label="Previous frame"><svg class="ic"><use href="#i-skip-back"/></svg></button>
+      <button type="button" id="playPauseBtn" class="player-pill">⏸ Pause</button>
+      <button type="button" id="playNextBtn" class="player-icon-btn" title="Next" aria-label="Next frame"><svg class="ic"><use href="#i-skip-fwd"/></svg></button>
+    </div>
+    <div class="speed-select-wrap">
+      <span>Speed</span>
       <select id="playSpeed">
         <option value="60">Turbo — 60ms (16 fps)</option>
         <option value="100">Very fast — 100ms (10 fps)</option>
@@ -313,1015 +277,18 @@
         <option value="custom">Custom…</option>
       </select>
       <input type="number" id="playCustom" value="400" min="30" max="5000" step="10" style="display:none;">
-      <button id="playClose">Close</button>
     </div>
   </div>
-
-  <!-- DECODE -->
-  <div class="panel" id="panel-decode">
-    <div class="card">
-      <h2>1. Scan the codes</h2>
-      <p class="sub">Point your camera at the sequence — any order, repeats are ignored. Leave it running through a few loops until every tile turns green.</p>
-
-      <div id="diagBar" class="status info" style="cursor:pointer;">Checking environment…</div>
-      <div id="logPanel" style="display:none;">
-        <div class="btn-row" style="margin:10px 0 6px;">
-          <button class="secondary tiny" id="copyLogBtn">📋 Copy logs</button>
-          <button class="secondary tiny" id="clearLogBtn">Clear</button>
-          <span class="meta-line" id="copyLogMsg" style="align-self:center;"></span>
-        </div>
-        <pre id="logBox" class="readout" style="white-space:pre-wrap; max-height:280px; overflow-y:auto; margin-top:0;"></pre>
-      </div>
-
-      <div id="mobileCamBlock">
-        <div class="btn-row">
-          <button id="startCamBtn">Start camera</button>
-          <button class="secondary" id="stopCamBtn" disabled>Stop camera</button>
-          <button class="secondary" id="recheckBtn">Re-check</button>
-        </div>
-        <div class="viewport" id="viewport">
-          <video id="video" playsinline webkit-playsinline muted autoplay style="display:none;"></video>
-          <canvas id="overlay"></canvas>
-          <div class="brackets"><i></i><i></i><i></i><i></i></div>
-          <div class="vp-idle" id="vpIdle">Camera preview — press <b>Start camera</b></div>
-          <div class="vp-hud" id="vpHud"></div>
-        </div>
-        <canvas id="scanCanvas" style="display:none;"></canvas>
-        <div class="vp-tools" id="vpTools" style="display:none;">
-          <button class="secondary tiny" id="torchBtn" style="display:none;">🔦 Torch</button>
-          <label id="zoomWrap" style="display:none; flex:1; min-width:140px;">
-            <span style="font-size:11px; color:var(--ink-soft);">Zoom</span>
-            <input type="range" id="zoomRange" min="1" max="5" step="0.1" value="1">
-          </label>
-        </div>
-      </div>
-
-      <div class="field" style="margin-top:18px;">
-        <label for="imgInput">Or upload QR code image files</label>
-        <input type="file" id="imgInput" accept="image/*" multiple>
-      </div>
-
-      <div id="scanStatus"></div>
-      <div class="progress-bar" id="progressBar" style="display:none;"><div id="progressFill"></div></div>
-      <div class="meta-line" id="progressLabel" style="display:none;"></div>
-      <div class="chunk-grid" id="chunkGrid"></div>
-      <div id="downloadArea"></div>
-      <div class="btn-row" id="resetRow" style="display:none; margin-top:16px;">
-        <button class="secondary tiny" id="resetSessionBtn">Reset session</button>
-      </div>
-    </div>
-  </div>
-
-  <footer>
-    Everything runs locally in this page — files are never uploaded anywhere.
-    QR generation uses qrcodejs, scanning uses jsQR, compression uses pako.
-  </footer>
 </div>
 
-<script>
-/* =========================================================
-   BUILD STAMP — bump this on every edit. If the number shown
-   in the header / diagnostics panel is not the latest one,
-   the browser is serving a CACHED copy and nothing you see
-   reflects the current code.
-   ========================================================= */
-const BUILD = 'v1.0 · prod';
-document.getElementById('buildTag').textContent = 'build ' + BUILD;
-
-/* ================= tabs ================= */
-document.querySelectorAll('.tab').forEach(t=>{
-  t.addEventListener('click', ()=>{
-    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
-    document.querySelectorAll('.panel').forEach(x=>x.classList.remove('active'));
-    t.classList.add('active');
-    document.getElementById('panel-'+t.dataset.tab).classList.add('active');
-    if(t.dataset.tab === 'encode') stopCamera();
-    else fixViewportHeight();
-  });
-});
-
-/* ================= helpers ================= */
-const MAGIC = 'PQPDF2';
-function genId(){ return Math.random().toString(36).slice(2,8).toUpperCase(); }
-function fmtKB(b){ return b < 1024 ? b+' B' : (b/1024).toFixed(1)+' KB'; }
-function eccConst(v){
-  return {L:QRCode.CorrectLevel.L, M:QRCode.CorrectLevel.M, Q:QRCode.CorrectLevel.Q, H:QRCode.CorrectLevel.H}[v] || QRCode.CorrectLevel.L;
-}
-function bytesToBase64(bytes){
-  let binary = '';
-  const chunk = 0x8000;
-  for(let i=0;i<bytes.length;i+=chunk){
-    binary += String.fromCharCode.apply(null, bytes.subarray(i, i+chunk));
-  }
-  return btoa(binary);
-}
-function base64ToBytes(b64){
-  const binary = atob(b64);
-  const bytes = new Uint8Array(binary.length);
-  for(let i=0;i<binary.length;i++) bytes[i] = binary.charCodeAt(i);
-  return bytes;
-}
-
-/* ================= container format ================= */
-function buildContainer(files){
-  const enc = new TextEncoder();
-  const manifest = JSON.stringify({ f: files.map(f=>({ n:f.name, s:f.bytes.length })) });
-  const head = enc.encode(MAGIC+'\n'+manifest+'\n');
-  const total = head.length + files.reduce((a,f)=>a+f.bytes.length,0);
-  const out = new Uint8Array(total);
-  out.set(head, 0);
-  let off = head.length;
-  for(const f of files){ out.set(f.bytes, off); off += f.bytes.length; }
-  return out;
-}
-function parseContainer(bytes){
-  const dec = new TextDecoder();
-  const nl1 = bytes.indexOf(10);
-  if(nl1 < 0 || dec.decode(bytes.subarray(0, nl1)) !== MAGIC) return null;
-  const nl2 = bytes.indexOf(10, nl1+1);
-  if(nl2 < 0) return null;
-  const manifest = JSON.parse(dec.decode(bytes.subarray(nl1+1, nl2)));
-  let off = nl2+1;
-  return manifest.f.map(m=>{
-    const b = bytes.subarray(off, off+m.s);
-    off += m.s;
-    return { name:m.n, bytes:b };
-  });
-}
-
-/* ================= ENCODE ================= */
-const genForm      = document.getElementById('genForm');
-const genStatus    = document.getElementById('genStatus');
-const resultCard   = document.getElementById('resultCard');
-const resultSub    = document.getElementById('resultSub');
-const qrGrid       = document.getElementById('qrGrid');
-const fileListEl   = document.getElementById('fileList');
-const chunkInput   = document.getElementById('chunkSize');
-const autoChunkBox = document.getElementById('autoChunk');
-const compressSel  = document.getElementById('compress');
-const densitySel   = document.getElementById('density');
-const estimateEl   = document.getElementById('estimate');
-const genBtn       = document.getElementById('genBtn');
-
-/* ECC is fixed in production rather than user-facing: M gives real error-correction
-   headroom for a moving-camera scan without eating into the low-density byte budget
-   the way L would force higher density to compensate, or H would waste capacity. */
-const FIXED_ECC = 'M';
-
-let pendingFiles = [];
-let qrPayloads   = [];
-let currentEcc   = FIXED_ECC;
-
-document.getElementById('pdfInput').addEventListener('change', async (e)=>{
-  const files = Array.from(e.target.files||[]);
-  for(const f of files){
-    const buf = await f.arrayBuffer();
-    pendingFiles.push({ name: f.name.replace(/\|/g,'_'), bytes: new Uint8Array(buf) });
-  }
-  e.target.value = '';
-  renderFileList();
-  refreshEstimate();
-});
-
-document.getElementById('clearBtn').addEventListener('click', ()=>{
-  pendingFiles = []; qrPayloads = [];
-  qrGrid.innerHTML = '';
-  resultCard.style.display='none';
-  genStatus.innerHTML='';
-  renderFileList(); refreshEstimate();
-});
-
-function renderFileList(){
-  if(!pendingFiles.length){
-    fileListEl.innerHTML = '<div class="empty">No files added yet.</div>';
-    genBtn.disabled = true;
-    return;
-  }
-  genBtn.disabled = false;
-  fileListEl.innerHTML = '';
-  pendingFiles.forEach((f,i)=>{
-    const row = document.createElement('div');
-    row.className = 'filerow';
-    const nm = document.createElement('div');
-    nm.className = 'nm'; nm.textContent = (i+1)+'. '+f.name;
-    const sz = document.createElement('div');
-    sz.className = 'sz'; sz.textContent = fmtKB(f.bytes.length);
-    const rm = document.createElement('button');
-    rm.type='button'; rm.className='secondary tiny'; rm.textContent='remove';
-    rm.addEventListener('click', ()=>{ pendingFiles.splice(i,1); renderFileList(); refreshEstimate(); });
-    row.appendChild(nm); row.appendChild(sz); row.appendChild(rm);
-    fileListEl.appendChild(row);
-  });
-}
-
-const ECC_CAP = { L:2900, M:2300, Q:1600, H:1250 };
-
-/* Density is now capped hard. A QR carrying ~200–600 bytes stays at a low
-   version number (big modules), which is what makes it lock on instantly at
-   speed. File size no longer pushes the density up — it only adds more codes. */
-const HARD_MIN = 150, HARD_MAX = 600;
-
-function suggestChunk(b64len, ecc){
-  const cap = Math.min(ECC_CAP[ecc] || 2900, HARD_MAX);
-  let want = parseInt(densitySel.value, 10) || 400;
-  // very small payloads: go sparser still, it costs almost nothing
-  if(b64len <= 2500) want = Math.min(want, 250);
-  return Math.max(HARD_MIN, Math.min(want, cap));
-}
-
-let packCache = null;
-function packKey(){
-  return pendingFiles.map(f=>f.name+':'+f.bytes.length).join('~') + '#' + compressSel.value;
-}
-function packedSize(){
-  if(!pendingFiles.length) return null;
-  const key = packKey();
-  if(packCache && packCache.key === key) return packCache;
-  const container = buildContainer(pendingFiles);
-  const level = parseInt(compressSel.value,10);
-  const payload = level > 0 ? pako.gzip(container, { level }) : container;
-  packCache = { key, payload, raw: container.length };
-  return packCache;
-}
-
-function refreshEstimate(){
-  if(!pendingFiles.length){ estimateEl.textContent = 'Add a file to see the estimate.'; return; }
-  const { payload, raw } = packedSize();
-  const b64len = Math.ceil(payload.length/3)*4;
-  const ecc = FIXED_ECC;
-  if(autoChunkBox.checked) chunkInput.value = suggestChunk(b64len, ecc);
-  const cap = Math.min(ECC_CAP[ecc], 2860) - 40;
-  let chunk = parseInt(chunkInput.value,10) || 400;
-  if(chunk > cap){ chunk = cap; if(autoChunkBox.checked) chunkInput.value = chunk; }
-  const total = Math.ceil(b64len / chunk);
-
-  const saved = raw ? Math.round(100 - (payload.length/raw)*100) : 0;
-  const secs = Math.round(total * 400 / 1000);
-  let html = '<b>'+pendingFiles.length+'</b> file(s) · <b>'+fmtKB(raw)+'</b> raw'
-    + (parseInt(compressSel.value,10) > 0 ? ' → <b>'+fmtKB(payload.length)+'</b> packed ('+saved+'% smaller)' : '')
-    + ' · <b>'+total+'</b> QR code(s) at '+chunk+' bytes each'
-    + '<br><span style="color:var(--ink-soft)">One full pass ≈ '+secs+'s at 400ms/frame, ≈ '+Math.round(total*0.1)+'s on turbo.</span>';
-  if(chunk > 600) html += '<br><span style="color:var(--amber)">Above 600 bytes the pattern gets dense and a moving camera may miss codes. 200–600 scans fastest.</span>';
-  if(total > 600) html += '<br><span style="color:var(--amber)">'+total+' codes is a long transfer — raise the density a step or send fewer files per batch.</span>';
-  estimateEl.innerHTML = html;
-}
-
-chunkInput.addEventListener('input', ()=>{ autoChunkBox.checked = false; refreshEstimate(); });
-autoChunkBox.addEventListener('change', refreshEstimate);
-compressSel.addEventListener('change', refreshEstimate);
-densitySel.addEventListener('change', ()=>{ autoChunkBox.checked = true; refreshEstimate(); });
-
-genForm.addEventListener('submit', (e)=>{
-  e.preventDefault();
-  if(!pendingFiles.length) return;
-  genStatus.innerHTML = '<div class="status info">Packing…</div>';
-  qrGrid.innerHTML = '';
-  resultCard.style.display = 'none';
-
-  setTimeout(()=>{
-    try{
-      const { payload, raw } = packedSize();
-      const b64 = bytesToBase64(payload);
-      const ecc = FIXED_ECC;
-      currentEcc = ecc;
-      const cap = Math.min(ECC_CAP[ecc], 2860) - 40;
-      let chunk = Math.min(parseInt(chunkInput.value,10) || 400, cap);
-      const id = genId();
-      const total = Math.ceil(b64.length / chunk);
-
-      qrPayloads = [];
-      for(let i=0;i<total;i++){
-        qrPayloads.push(['Q2', id, total, i, b64.slice(i*chunk, (i+1)*chunk)].join('|'));
-      }
-
-      renderGridLazy(id, total);
-      const names = pendingFiles.map(f=>f.name).join(', ');
-      resultSub.textContent = names+' — '+total+' code(s), sequence ID '+id
-        +'. Play them on this screen and scan with the other device.';
-      resultCard.style.display = 'block';
-      genStatus.innerHTML = '<div class="status ok">Packed '+fmtKB(raw)+' → '+fmtKB(payload.length)
-        +' → '+total+' QR code(s). Hit “Play sequence” for the fastest transfer.</div>';
-    }catch(err){
-      genStatus.innerHTML = '<div class="status err">Could not build the sequence: '+err.message+'</div>';
-    }
-  }, 30);
-});
-
-let gridObserver = null;
-function renderGridLazy(id, total){
-  if(gridObserver) gridObserver.disconnect();
-  qrGrid.innerHTML = '';
-  const cells = [];
-  for(let i=0;i<total;i++){
-    const cell = document.createElement('div');
-    cell.className = 'qr-cell';
-    cell.dataset.idx = i;
-    cell.innerHTML = '<div class="ph">'+(i+1)+'</div><div class="idx">'+(i+1)+' / '+total+'   ['+id+']</div>';
-    qrGrid.appendChild(cell);
-    cells.push(cell);
-  }
-  if('IntersectionObserver' in window){
-    gridObserver = new IntersectionObserver((entries)=>{
-      entries.forEach(en=>{ if(en.isIntersecting){ drawCell(en.target); gridObserver.unobserve(en.target); } });
-    }, { rootMargin:'300px' });
-    cells.forEach(c=>gridObserver.observe(c));
-  } else {
-    cells.forEach(drawCell);
-  }
-}
-function drawCell(cell){
-  if(cell.dataset.drawn) return;
-  cell.dataset.drawn = '1';
-  const i = parseInt(cell.dataset.idx,10);
-  const ph = cell.querySelector('.ph');
-  const holder = document.createElement('div');
-  if(ph) cell.replaceChild(holder, ph);
-  else cell.insertBefore(holder, cell.firstChild);
-  new QRCode(holder, { text:qrPayloads[i], width:180, height:180, correctLevel:eccConst(currentEcc) });
-}
-document.getElementById('renderAllBtn').addEventListener('click', ()=>{
-  qrGrid.querySelectorAll('.qr-cell').forEach(drawCell);
-});
-document.getElementById('printBtn').addEventListener('click', ()=>{
-  qrGrid.querySelectorAll('.qr-cell').forEach(drawCell);
-  setTimeout(()=>window.print(), 300);
-});
-document.getElementById('dlAllBtn').addEventListener('click', ()=>{
-  qrGrid.querySelectorAll('.qr-cell').forEach(drawCell);
-  setTimeout(()=>{
-    const nodes = qrGrid.querySelectorAll('canvas, .qr-cell img');
-    let i = 0;
-    const step = ()=>{
-      if(i >= nodes.length) return;
-      const node = nodes[i];
-      const url = node.tagName === 'CANVAS' ? node.toDataURL('image/png') : node.src;
-      const a = document.createElement('a');
-      a.href = url; a.download = 'qr_'+String(i+1).padStart(3,'0')+'.png';
-      document.body.appendChild(a); a.click(); document.body.removeChild(a);
-      i++;
-      setTimeout(step, 120);
-    };
-    step();
-  }, 400);
-});
-
-/* ================= PLAYER ================= */
-const playOverlay  = document.getElementById('playOverlay');
-const playStage    = document.getElementById('playStage');
-const playInfo     = document.getElementById('playInfo');
-const playSpeedSel = document.getElementById('playSpeed');
-const playCustom   = document.getElementById('playCustom');
-const playPauseBtn = document.getElementById('playPauseBtn');
-const playSub      = document.getElementById('playSub');
-
-let playIdx = 0, playTimer = null, playRunning = false, playLoops = 0;
-const frameCache = new Map();
-const CACHE_MAX = 24;
-
-function frameNode(i){
-  if(frameCache.has(i)) return frameCache.get(i);
-  const holder = document.createElement('div');
-  new QRCode(holder, { text:qrPayloads[i], width:560, height:560, correctLevel:eccConst(currentEcc) });
-  if(frameCache.size >= CACHE_MAX) frameCache.delete(frameCache.keys().next().value);
-  frameCache.set(i, holder);
-  return holder;
-}
-function renderPlayFrame(){
-  if(!qrPayloads.length) return;
-  const node = frameNode(playIdx);
-  playStage.innerHTML = '';
-  playStage.appendChild(node);
-  playInfo.textContent = (playIdx+1)+' / '+qrPayloads.length + (playLoops ? '   · loop '+(playLoops+1) : '');
-  const nxt = (playIdx+1) % qrPayloads.length;
-  if(!frameCache.has(nxt)) setTimeout(()=>frameNode(nxt), 0);
-}
-function currentSpeed(){
-  return playSpeedSel.value === 'custom'
-    ? Math.max(30, parseInt(playCustom.value,10) || 400)
-    : parseInt(playSpeedSel.value,10);
-}
-function playTick(){
-  playIdx = playIdx + 1;
-  if(playIdx >= qrPayloads.length){ playIdx = 0; playLoops++; }
-  renderPlayFrame();
-}
-function startPlayTimer(){
-  stopPlayTimer();
-  playTimer = setInterval(playTick, currentSpeed());
-  playRunning = true;
-  playPauseBtn.textContent = '⏸ Pause';
-}
-function stopPlayTimer(){
-  if(playTimer) clearInterval(playTimer);
-  playTimer = null; playRunning = false;
-}
-document.getElementById('playBtn').addEventListener('click', ()=>{
-  if(!qrPayloads.length) return;
-  playIdx = 0; playLoops = 0;
-  frameCache.clear();
-  playOverlay.classList.add('active');
-  playSub.textContent = 'Point the other device\'s camera at this screen — any order, so just let it loop.';
-  renderPlayFrame();
-  startPlayTimer();
-});
-document.getElementById('playClose').addEventListener('click', ()=>{
-  stopPlayTimer(); playOverlay.classList.remove('active'); frameCache.clear();
-});
-playPauseBtn.addEventListener('click', ()=>{
-  if(playRunning){ stopPlayTimer(); playPauseBtn.textContent = '▶ Resume'; }
-  else startPlayTimer();
-});
-document.getElementById('playNextBtn').addEventListener('click', ()=>{
-  playIdx = (playIdx+1) % qrPayloads.length; renderPlayFrame(); if(playRunning) startPlayTimer();
-});
-document.getElementById('playPrevBtn').addEventListener('click', ()=>{
-  playIdx = (playIdx-1+qrPayloads.length) % qrPayloads.length; renderPlayFrame(); if(playRunning) startPlayTimer();
-});
-playSpeedSel.addEventListener('change', ()=>{
-  playCustom.style.display = playSpeedSel.value === 'custom' ? 'inline-block' : 'none';
-  if(playRunning) startPlayTimer();
-});
-playCustom.addEventListener('change', ()=>{ if(playRunning) startPlayTimer(); });
-document.addEventListener('keydown', (e)=>{
-  if(!playOverlay.classList.contains('active')) return;
-  if(e.key === 'Escape'){ stopPlayTimer(); playOverlay.classList.remove('active'); }
-  if(e.key === ' '){ e.preventDefault(); playPauseBtn.click(); }
-  if(e.key === 'ArrowRight') document.getElementById('playNextBtn').click();
-  if(e.key === 'ArrowLeft')  document.getElementById('playPrevBtn').click();
-});
-
-/* ================= viewport sizing (no aspect-ratio dependency) ================= */
-const viewportEl = document.getElementById('viewport');
-/* The video now sizes the wrapper itself (width:100%, height:auto), so there is
-   nothing to force. This only keeps the overlay canvas matched to the box. */
-function fixViewportHeight(){
-  try{
-    const w = Math.round(viewportEl.clientWidth);
-    const h = Math.round(viewportEl.clientHeight);
-    const ov = document.getElementById('overlay');
-    if(ov && w && h && (ov.width !== w || ov.height !== h)){ ov.width = w; ov.height = h; }
-  }catch(e){}
-}
-window.addEventListener('resize', fixViewportHeight);
-window.addEventListener('orientationchange', ()=>setTimeout(fixViewportHeight, 300));
-setTimeout(fixViewportHeight, 0);
-setTimeout(fixViewportHeight, 600);
-
-/* ================= logging ================= */
-const diagBar   = document.getElementById('diagBar');
-const logPanel  = document.getElementById('logPanel');
-const logBox    = document.getElementById('logBox');
-const logLines  = [];
-
-function ts(){
-  const d = new Date();
-  return d.toTimeString().slice(0,8) + '.' + String(d.getMilliseconds()).padStart(3,'0');
-}
-function log(msg){
-  logLines.push('['+ts()+'] '+msg);
-  if(logBox){
-    logBox.textContent = logLines.join('\n');
-    logBox.scrollTop = logBox.scrollHeight;
-  }
-}
-function setDiagBar(kind, text){
-  diagBar.className = 'status ' + kind;
-  diagBar.textContent = text + '  (tap to ' + (logPanel.style.display === 'none' ? 'show' : 'hide') + ' logs)';
-}
-diagBar.addEventListener('click', ()=>{
-  logPanel.style.display = logPanel.style.display === 'none' ? 'block' : 'none';
-  diagBar.textContent = diagBar.textContent.replace(/tap to (show|hide) logs/, 'tap to ' + (logPanel.style.display === 'none' ? 'show' : 'hide') + ' logs');
-});
-document.getElementById('clearLogBtn').addEventListener('click', ()=>{
-  logLines.length = 0;
-  logBox.textContent = '';
-  log('Log cleared.');
-});
-document.getElementById('copyLogBtn').addEventListener('click', async ()=>{
-  const msgEl = document.getElementById('copyLogMsg');
-  const text = logLines.join('\n') || '(no log entries yet)';
-  let ok = false;
-  try{
-    await navigator.clipboard.writeText(text);
-    ok = true;
-  }catch(e){
-    try{
-      const ta = document.createElement('textarea');
-      ta.value = text;
-      ta.style.position = 'fixed'; ta.style.opacity = '0';
-      document.body.appendChild(ta);
-      ta.focus(); ta.select();
-      ok = document.execCommand('copy');
-      document.body.removeChild(ta);
-    }catch(e2){ ok = false; }
-  }
-  msgEl.textContent = ok ? 'Copied ✓' : 'Copy blocked — tap in the box and select all manually';
-  msgEl.style.color = ok ? 'var(--ok)' : 'var(--amber)';
-  setTimeout(()=>{ msgEl.textContent = ''; }, 3000);
-});
-
-/* ================= environment diagnostics ================= */
-function detectInApp(){
-  const ua = navigator.userAgent || '';
-  const hits = [];
-  if(/FBAN|FBAV|FB_IAB/i.test(ua)) hits.push('Facebook');
-  if(/Instagram/i.test(ua)) hits.push('Instagram');
-  if(/WhatsApp/i.test(ua)) hits.push('WhatsApp');
-  if(/Line\//i.test(ua)) hits.push('LINE');
-  if(/Snapchat/i.test(ua)) hits.push('Snapchat');
-  if(/Twitter/i.test(ua)) hits.push('X/Twitter');
-  if(/TikTok|musical_ly|BytedanceWebview/i.test(ua)) hits.push('TikTok');
-  if(/; wv\)/i.test(ua)) hits.push('Android WebView');
-  if(/Telegram/i.test(ua)) hits.push('Telegram');
-  return hits;
-}
-
-async function runDiagnostics(){
-  const inIframe = (function(){ try{ return window.self !== window.top; }catch(e){ return true; } })();
-  const proto    = location.protocol;
-  const secure   = !!window.isSecureContext;
-  const hasAPI   = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
-  const libs     = { QRCode: typeof QRCode !== 'undefined', jsQR: typeof jsQR === 'function', pako: typeof pako !== 'undefined' };
-  const inApp    = detectInApp();
-
-  let perm = 'unknown';
-  try{
-    if(navigator.permissions && navigator.permissions.query){
-      const p = await navigator.permissions.query({ name:'camera' });
-      perm = p.state;
-    }
-  }catch(e){ perm = 'not reportable'; }
-
-  let camCount = 'not checked', camLabels = '';
-  if(hasAPI && navigator.mediaDevices.enumerateDevices){
-    try{
-      const devs = (await navigator.mediaDevices.enumerateDevices()).filter(d=>d.kind === 'videoinput');
-      camCount = devs.length;
-      camLabels = devs.map(d=>d.label).filter(Boolean).join(' / ');
-    }catch(e){ camCount = 'enumerateDevices failed ('+e.name+')'; }
-  }
-
-  const rows = [
-    ['Page address', proto + '//' + location.host + (inIframe ? ' (inside an embedded preview)' : '')],
-    ['Secure context (https/localhost)', secure ? 'ok' : 'NO'],
-    ['Embedded in iframe', inIframe ? 'YES — blocks camera' : 'ok'],
-    ['In-app browser', inApp.length ? inApp.join(', ') : 'no'],
-    ['getUserMedia available', hasAPI ? 'ok' : 'NO'],
-    ['Camera permission', perm],
-    ['Cameras reported', camCount + (camLabels ? ' — '+camLabels : '')],
-    ['Libraries', (libs.QRCode?'QRCode ok':'QRCode NO')+' · '+(libs.jsQR?'jsQR ok':'jsQR NO')+' · '+(libs.pako?'pako ok':'pako NO')],
-    ['Viewport box', Math.round(viewportEl.clientWidth)+'×'+Math.round(viewportEl.clientHeight)+' px'],
-    ['Video state', 'readyState '+video.readyState+' · '+(video.videoWidth||0)+'×'+(video.videoHeight||0)+' · paused '+video.paused]
-  ];
-
-  const blockers = [];
-  if(!secure) blockers.push('Not a secure context ('+proto+'). Camera only works on https:// or localhost. Run "python3 -m http.server 8000" in the file\'s folder and open http://localhost:8000/pdf-qr-bridge.html.');
-  if(inIframe) blockers.push('Page is inside an embedded preview. Iframes block camera access regardless of browser settings — open the page in its own tab.');
-  if(inApp.length) blockers.push('In-app browser detected ('+inApp.join(', ')+'). These often block camera access — use the ⋯ menu and choose "Open in browser".');
-  if(!hasAPI) blockers.push('This browser exposes no getUserMedia API at all.');
-  if(camCount === 0) blockers.push('0 cameras reported while permission is '+perm+'. This means the phone OS is blocking the browser app itself. Android: Settings > Apps > [browser] > Permissions > Camera > Allow. iPhone: Settings > [browser] > Camera > Allow. Fully close and reopen the browser afterward.');
-  if(!libs.jsQR) blockers.push('jsQR did not load (CDN blocked or offline) — scanning cannot run.');
-
-  log('=== Environment check (build ' + BUILD + ') ===');
-  rows.forEach(r=>log(r[0] + ': ' + r[1]));
-  if(blockers.length){
-    blockers.forEach(b=>log('BLOCKER: ' + b));
-    const worst = !secure || !hasAPI ? 'err' : 'warn';
-    setDiagBar(worst, (inIframe ? '⚠ Blocked — inside an embedded preview' : blockers.length ? '⚠ ' + blockers.length + ' issue(s) found' : '⚠ Camera may not work'));
-  } else {
-    log('No blockers found.');
-    setDiagBar('ok', '✓ Nothing blocking the camera');
-  }
-}
-
-/* ================= DECODE ================= */
-const video        = document.getElementById('video');
-const scanCanvas   = document.getElementById('scanCanvas');
-const scanCtx      = scanCanvas.getContext('2d', { willReadFrequently:true });
-const overlayEl    = document.getElementById('overlay');
-const overlayCtx   = overlayEl.getContext('2d');
-const vpIdle       = document.getElementById('vpIdle');
-const vpHud        = document.getElementById('vpHud');
-const vpTools      = document.getElementById('vpTools');
-const scanStatus   = document.getElementById('scanStatus');
-const chunkGrid    = document.getElementById('chunkGrid');
-const progressBar  = document.getElementById('progressBar');
-const progressFill = document.getElementById('progressFill');
-const progressLabel= document.getElementById('progressLabel');
-const downloadArea = document.getElementById('downloadArea');
-const resetRow     = document.getElementById('resetRow');
-const startCamBtn  = document.getElementById('startCamBtn');
-const stopCamBtn   = document.getElementById('stopCamBtn');
-
-let stream = null, rafId = null;
-let session = null;
-
-function setStatus(msg, kind){
-  scanStatus.innerHTML = '<div class="status '+(kind||'info')+'">'+msg+'</div>';
-}
-document.getElementById('resetSessionBtn').addEventListener('click', ()=>{
-  log('Session manually reset by user.');
-  session = null; downloadArea.innerHTML=''; chunkGrid.innerHTML='';
-  progressBar.style.display='none'; progressLabel.style.display='none';
-  resetRow.style.display='none'; setStatus('Session cleared — ready for a new sequence.','info');
-});
-
-function ensureSession(id, total, legacyName){
-  if(!session || session.id !== id){
-    log('New sequence detected: ' + id + ' (' + total + ' codes expected).');
-    session = { id, total, chunks:new Map(), legacyName: legacyName||null, done:false };
-    downloadArea.innerHTML = '';
-  }
-  if(legacyName) session.legacyName = legacyName;
-  resetRow.style.display = 'flex';
-}
-
-function renderChunkGrid(){
-  if(!session){ chunkGrid.innerHTML=''; progressBar.style.display='none'; progressLabel.style.display='none'; return; }
-  progressBar.style.display = 'block';
-  progressLabel.style.display = 'block';
-  if(chunkGrid.childElementCount !== session.total){
-    chunkGrid.innerHTML = '';
-    for(let i=0;i<session.total;i++){
-      const d = document.createElement('div');
-      d.className = 'chunk-dot'; d.textContent = i+1;
-      chunkGrid.appendChild(d);
-    }
-  }
-  for(let i=0;i<session.total;i++){
-    if(session.chunks.has(i)) chunkGrid.children[i].classList.add('got');
-  }
-  const pct = Math.round(100 * session.chunks.size / session.total);
-  progressFill.style.width = pct+'%';
-  const missing = session.total - session.chunks.size;
-  progressLabel.textContent = pct+'% — '+session.chunks.size+' / '+session.total+' codes'
-    + (missing && missing <= 12 ? '  · still missing: '+missingList().join(', ') : '');
-  if(session.chunks.size === session.total && !session.done){
-    session.done = true;
-    completeSession();
-  }
-}
-function missingList(){
-  const out = [];
-  for(let i=0;i<session.total;i++) if(!session.chunks.has(i)) out.push(i+1);
-  return out;
-}
-
-function handleDecodedText(text){
-  const parts = text.split('|');
-  if(parts.length < 5) return false;
-  let id, total, idx, data, legacyName = null;
-  if(parts[0] === 'Q2'){
-    id = parts[1]; total = parseInt(parts[2],10); idx = parseInt(parts[3],10);
-    data = parts.slice(4).join('|');
-  } else {
-    id = parts[0]; total = parseInt(parts[1],10); idx = parseInt(parts[2],10);
-    legacyName = parts[3] || null; data = parts.slice(4).join('|');
-  }
-  if(isNaN(total) || isNaN(idx)) return false;
-
-  ensureSession(id, total, legacyName);
-  if(session.id !== id){
-    log('Ignored code from different sequence: ' + id + ' (collecting ' + session.id + ').');
-    setStatus('That code belongs to a different sequence ('+id+') — ignored.', 'warn');
-    return false;
-  }
-  if(!session.chunks.has(idx)){
-    session.chunks.set(idx, data);
-    setStatus('Captured '+(idx+1)+' of '+total+'.', 'ok');
-    renderChunkGrid();
-  }
-  return true;
-}
-
-function completeSession(){
-  log('All ' + session.total + ' chunks captured for sequence ' + session.id + ' — reassembling.');
-  stopCamera();
-  let full = '';
-  for(let i=0;i<session.total;i++) full += session.chunks.get(i);
-  try{
-    let bytes = base64ToBytes(full);
-    if(bytes[0] === 0x1f && bytes[1] === 0x8b) bytes = pako.ungzip(bytes);
-    let files = parseContainer(bytes);
-    if(!files) files = [{ name: session.legacyName || 'recovered.pdf', bytes }];
-    downloadArea.innerHTML = '';
-    files.forEach(f=>{
-      const blob = new Blob([f.bytes], { type:'application/pdf' });
-      const a = document.createElement('a');
-      a.className = 'download-link';
-      a.href = URL.createObjectURL(blob);
-      a.download = f.name || 'recovered.pdf';
-      a.textContent = '↓ '+(f.name||'recovered.pdf')+'  ('+fmtKB(f.bytes.length)+')';
-      downloadArea.appendChild(a);
-    });
-    log('Reassembled ' + files.length + ' file(s) successfully.');
-    setStatus('All '+session.total+' codes received — '+files.length+' file(s) rebuilt.', 'ok');
-  }catch(err){
-    session.done = false;
-    log('Reassembly FAILED: ' + err.message);
-    setStatus('Reassembly failed ('+err.message+') — one code was probably misread. Reset the session and rescan.', 'err');
-  }
-}
-
-/* ---------------- camera ---------------- */
-startCamBtn.addEventListener('click', ()=>{ startCamera().catch(e=>{
-  log('UNEXPECTED top-level failure: ' + e.name + ' — ' + e.message);
-  setStatus('Unexpected failure starting the camera: '+e.name+' — '+e.message, 'err');
-  releaseStream(); startCamBtn.disabled = false; stopCamBtn.disabled = true;
-}); });
-stopCamBtn.addEventListener('click', stopCamera);
-document.getElementById('recheckBtn').addEventListener('click', ()=>{ fixViewportHeight(); runDiagnostics(); });
-
-function releaseStream(){
-  if(stream){ try{ stream.getTracks().forEach(t=>t.stop()); }catch(e){} stream = null; }
-  try{ video.srcObject = null; }catch(e){}
-}
-
-function withTimeout(promise, ms, label){
-  return Promise.race([
-    Promise.resolve(promise),
-    new Promise((_,rej)=>setTimeout(()=>rej(new Error(label+' timed out after '+ms+'ms')), ms))
-  ]);
-}
-
-async function startCamera(){
-  log('Start camera pressed.');
-  if(typeof jsQR !== 'function'){
-    log('ABORT: jsQR not loaded.');
-    setStatus('The QR-scanning library failed to load (jsQR missing) — usually a network/CDN issue. Reload the page.', 'warn');
-    return;
-  }
-  if(!window.isSecureContext){
-    log('ABORT: not a secure context (' + location.protocol + ').');
-    setStatus('Camera blocked: this page is not on https:// or localhost. Host the file, or use “Upload QR image files” below.', 'warn');
-    return;
-  }
-  if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
-    log('ABORT: no getUserMedia API in this browser.');
-    setStatus('This browser exposes no camera API. Try Chrome, Safari or Firefox, or upload QR images.', 'warn');
-    return;
-  }
-
-  startCamBtn.disabled = true;
-  setStatus('Requesting camera…', 'info');
-  log('Calling getUserMedia (facingMode: ideal environment)…');
-  fixViewportHeight();
-
-  /* --- 1. acquire the stream (back camera only, never {exact:…}) --- */
-  let s = null;
-  try{
-    try{
-      s = await navigator.mediaDevices.getUserMedia({
-        video:{ facingMode:{ ideal:'environment' }, width:{ ideal:1920 }, height:{ ideal:1080 } }
-      });
-      log('getUserMedia resolved on first attempt.');
-    }catch(inner){
-      log('First getUserMedia attempt failed: ' + inner.name + ' — ' + inner.message);
-      if(['OverconstrainedError','ConstraintNotSatisfiedError','NotFoundError','TypeError','NotReadableError'].indexOf(inner.name) !== -1){
-        log('Retrying with bare {video:true}…');
-        s = await navigator.mediaDevices.getUserMedia({ video:true });
-        log('Bare retry resolved.');
-      } else throw inner;
-    }
-  }catch(err){
-    log('getUserMedia FAILED: ' + err.name + ' — ' + err.message);
-    startCamBtn.disabled = false;
-    if(err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError'){
-      let inIframe = false; try{ inIframe = window.self !== window.top; }catch(e){ inIframe = true; }
-      log('Permission denied. inIframe=' + inIframe);
-      setStatus(inIframe
-        ? 'Camera blocked — this page is inside an embedded preview (iframe). Iframes block the camera no matter what your browser permission says. Open the page in its own tab.'
-        : 'Permission reported as denied. Reload the page, press Start camera and accept the prompt. If your browser says it is allowed, check the OS-level camera permission for the browser app itself.', 'warn');
-    } else if(err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError'){
-      setStatus('No camera reported. If this phone obviously has one, the OS is blocking the browser app: Android → Settings → Apps → [browser] → Permissions → Camera → Allow; iPhone → Settings → [browser] → Camera → Allow. Then fully close and reopen the browser.', 'warn');
-    } else if(err.name === 'NotReadableError'){
-      setStatus('The camera is already in use by another app or tab. Close it and try again.', 'warn');
-    } else {
-      setStatus('Could not access the camera ('+err.name+': '+err.message+'). You can upload QR images instead.', 'warn');
-    }
-    runDiagnostics();
-    return;
-  }
-
-  stream = s;
-  log('Stream acquired. Tracks: ' + stream.getVideoTracks().map(t=>t.label||'(unlabeled)').join(', '));
-
-  /* --- 2. attach to the <video>. Hide the placeholder as soon as ANY
-           readiness signal fires, independent of play() resolving. --- */
-  const reveal = ()=>{ log('Video readiness event fired — revealing preview.'); video.style.display = 'block'; vpIdle.style.display = 'none'; fixViewportHeight(); };
-  video.addEventListener('loadedmetadata', reveal, { once:true });
-  video.addEventListener('loadeddata',     reveal, { once:true });
-  video.addEventListener('playing',        reveal, { once:true });
-
-  try{
-    video.setAttribute('playsinline','');
-    video.setAttribute('webkit-playsinline','');
-    video.muted = true;
-    video.srcObject = stream;
-    log('Assigned stream to video.srcObject.');
-  }catch(e){
-    log('srcObject assignment failed (' + e.message + '), falling back to createObjectURL.');
-    try{ video.src = URL.createObjectURL(stream); }catch(e2){ log('createObjectURL fallback also failed: ' + e2.message); }
-  }
-
-  /* --- 3. play() inside try/catch WITH a timeout, so a hang or a
-           rejection can never leave the camera on and the UI stuck. --- */
-  let playErr = null;
-  try{
-    await withTimeout(video.play(), 7000, 'video.play()');
-    log('video.play() resolved.');
-  }catch(e){
-    playErr = e;
-    log('video.play() did not resolve cleanly: ' + e.message);
-  }
-
-  if(playErr && video.readyState < 2){
-    // genuinely dead — release the camera instead of leaving it lit
-    log('readyState still ' + video.readyState + ' after play() failure — releasing camera.');
-    releaseStream();
-    startCamBtn.disabled = false;
-    stopCamBtn.disabled = true;
-    video.style.display = 'none';
-    vpIdle.style.display = 'block';
-    setStatus('The camera opened but the video stream never started ('+playErr.message+'). This is usually an in-app browser or an autoplay restriction — try opening the page in Chrome/Safari directly, or use image upload.', 'err');
-    runDiagnostics();
-    return;
-  }
-  if(playErr){ log('Frames are arriving despite play() issue — continuing.'); setStatus('Note: play() reported "'+playErr.message+'" but frames are arriving — continuing.', 'warn'); }
-
-  video.style.display = 'block';
-  vpIdle.style.display = 'none';
-  vpTools.style.display = 'flex';
-
-  /* --- 4. capability probing is fully isolated: on some phones
-           getCapabilities() exists but throws, and that must not
-           abort anything above. --- */
-  try{ setupCamTools(); log('Capability probe (torch/zoom/focus) completed.'); }
-  catch(e){ log('Capability probe threw (' + e.message + ') — isolated, continuing.'); }
-
-  stopCamBtn.disabled = false;
-  scanStartedAt = performance.now();
-  lastFrameCheck = 0; frames = 0; fpsMark = performance.now(); fps = 0;
-  fixViewportHeight();
-  log('Camera fully started, entering scan loop. Video ' + video.videoWidth + '×' + video.videoHeight + '.');
-  runDiagnostics();
-  scanLoop();
-}
-
-function setupCamTools(){
-  const track = stream && stream.getVideoTracks()[0];
-  const torchBtn  = document.getElementById('torchBtn');
-  const zoomWrap  = document.getElementById('zoomWrap');
-  const zoomRange = document.getElementById('zoomRange');
-  torchBtn.style.display = 'none';
-  zoomWrap.style.display = 'none';
-  if(!track || typeof track.getCapabilities !== 'function') return;
-
-  let caps = null;
-  try{ caps = track.getCapabilities(); }catch(e){ return; }
-  if(!caps) return;
-
-  try{
-    if(caps.focusMode && caps.focusMode.indexOf && caps.focusMode.indexOf('continuous') !== -1){
-      track.applyConstraints({ advanced:[{ focusMode:'continuous' }] }).catch(()=>{});
-    }
-  }catch(e){}
-
-  try{
-    if(caps.torch){
-      let on = false;
-      torchBtn.style.display = 'inline-block';
-      torchBtn.onclick = ()=>{
-        on = !on;
-        track.applyConstraints({ advanced:[{ torch:on }] })
-          .then(()=>{ torchBtn.textContent = on ? '🔦 Torch on' : '🔦 Torch'; })
-          .catch(()=>{ torchBtn.textContent = '🔦 unsupported'; });
-      };
-    }
-  }catch(e){}
-
-  try{
-    if(caps.zoom){
-      zoomWrap.style.display = 'block';
-      zoomRange.min = caps.zoom.min; zoomRange.max = caps.zoom.max;
-      zoomRange.step = caps.zoom.step || 0.1;
-      let cur = caps.zoom.min;
-      try{ cur = track.getSettings().zoom || caps.zoom.min; }catch(e){}
-      zoomRange.value = cur;
-      zoomRange.oninput = ()=>{
-        track.applyConstraints({ advanced:[{ zoom: parseFloat(zoomRange.value) }] }).catch(()=>{});
-      };
-    }
-  }catch(e){}
-}
-
-function stopCamera(){
-  log('Stop camera called.');
-  if(rafId) cancelAnimationFrame(rafId);
-  rafId = null;
-  releaseStream();
-  video.style.display = 'none';
-  vpIdle.style.display = 'block';
-  vpTools.style.display = 'none';
-  viewportEl.classList.remove('locked');
-  vpHud.textContent = '';
-  try{ overlayCtx.clearRect(0,0,overlayEl.width,overlayEl.height); }catch(e){}
-  startCamBtn.disabled = false;
-  stopCamBtn.disabled  = true;
-}
-
-let lastFrameCheck = 0, scanStartedAt = 0, frames = 0, fpsMark = 0, fps = 0, lockUntil = 0;
-
-function drawLock(loc, sx, sy){
-  const boxW = viewportEl.clientWidth, boxH = viewportEl.clientHeight;
-  if(!boxW || !boxH) return;
-  if(overlayEl.width !== boxW || overlayEl.height !== boxH){
-    overlayEl.width = boxW; overlayEl.height = boxH;
-  }
-  overlayCtx.clearRect(0,0,boxW,boxH);
-  if(!loc) return;
-  const vw = video.videoWidth, vh = video.videoHeight;
-  if(!vw || !vh) return;
-  // the video fills the box exactly (width:100%, height:auto) — no crop, no letterbox
-  const k = boxW / vw;
-  const map = p => [ (p.x/sx)*k, (p.y/sy)*k ];
-  const pts = [loc.topLeftCorner, loc.topRightCorner, loc.bottomRightCorner, loc.bottomLeftCorner].map(map);
-  overlayCtx.beginPath();
-  overlayCtx.moveTo(pts[0][0], pts[0][1]);
-  for(let i=1;i<pts.length;i++) overlayCtx.lineTo(pts[i][0], pts[i][1]);
-  overlayCtx.closePath();
-  overlayCtx.strokeStyle = '#4ADE80';
-  overlayCtx.lineWidth = 3;
-  overlayCtx.stroke();
-}
-
-function scanLoop(){
-  if(!stream) return;
-  if(video.readyState >= 2 && video.videoWidth){
-    const nativeW = video.videoWidth, nativeH = video.videoHeight;
-    const targetW = Math.min(900, nativeW);
-    const scale = targetW / nativeW;
-    scanCanvas.width = targetW;
-    scanCanvas.height = Math.round(nativeH * scale);
-    scanCtx.drawImage(video, 0, 0, scanCanvas.width, scanCanvas.height);
-    const imageData = scanCtx.getImageData(0, 0, scanCanvas.width, scanCanvas.height);
-    const code = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts:'dontInvert' });
-
-    frames++;
-    const now = performance.now();
-    if(now - fpsMark > 500){ fps = Math.round(frames * 1000 / (now - fpsMark)); frames = 0; fpsMark = now; }
-
-    if(code && code.data){
-      handleDecodedText(code.data);
-      lockUntil = now + 250;
-      viewportEl.classList.add('locked');
-      drawLock(code.location, scale, scale);
-    } else {
-      if(now > lockUntil){ viewportEl.classList.remove('locked'); drawLock(null); }
-      if(now - lastFrameCheck > 400){
-        lastFrameCheck = now;
-        if(!session || session.chunks.size === 0){
-          const secs = Math.round((now - scanStartedAt)/1000);
-          let msg = '🔍 Scanning — camera active, no code detected yet ('+secs+'s).';
-          if(secs > 8) msg += ' Move closer, hold steadier, raise screen brightness, or slow the player down / lower bytes per QR code.';
-          setStatus(msg, 'info');
-        }
-      }
-    }
-    vpHud.textContent = nativeW+'×'+nativeH+' · '+fps+' fps · '
-      + (viewportEl.classList.contains('locked') ? 'LOCKED' : 'searching')
-      + (session ? ' · '+session.chunks.size+'/'+session.total : '');
-  } else {
-    vpHud.textContent = 'waiting for frames… readyState '+video.readyState;
-  }
-  rafId = requestAnimationFrame(scanLoop);
-}
-
-/* image upload fallback */
-document.getElementById('imgInput').addEventListener('change', (e)=>{
-  const files = Array.from(e.target.files || []);
-  files.forEach(file=>{
-    const img = new Image();
-    const url = URL.createObjectURL(file);
-    img.onload = ()=>{
-      const c = document.createElement('canvas');
-      c.width = img.width; c.height = img.height;
-      const ctx = c.getContext('2d');
-      ctx.drawImage(img, 0, 0);
-      const imageData = ctx.getImageData(0,0,c.width,c.height);
-      const code = jsQR(imageData.data, imageData.width, imageData.height);
-      if(code && code.data) handleDecodedText(code.data);
-      else setStatus('No QR code found in '+file.name+'.', 'warn');
-      URL.revokeObjectURL(url);
-    };
-    img.onerror = ()=>{ setStatus('Could not read '+file.name+' as an image.', 'warn'); URL.revokeObjectURL(url); };
-    img.src = url;
-  });
-  e.target.value = '';
-});
-
-renderFileList();
-runDiagnostics();
-</script>
+<!-- Scripts: plain (non-module) so they share one scope and work from file:// too.
+     ORDER MATTERS. -->
+<script src="js/core.js"></script>
+<script src="js/encode.js"></script>
+<script src="js/player.js"></script>
+<script src="js/diagnostics.js"></script>
+<script src="js/decode.js"></script>
+<script src="js/ui-extras.js"></script>
+<script src="js/main.js"></script>
 </body>
 </html>
