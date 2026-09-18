@@ -244,9 +244,19 @@
         <div class="grid2">
           <div class="field">
             <label for="chunkSize">Bytes per QR code</label>
-            <input type="number" id="chunkSize" value="600" min="100" max="2200" step="25">
+            <input type="number" id="chunkSize" value="400" min="100" max="900" step="25">
             <div class="meta-line"><label style="display:inline; text-transform:none; letter-spacing:0;">
               <input type="checkbox" id="autoChunk" checked style="width:auto;"> auto-suggest</label></div>
+          </div>
+          <div class="field">
+            <label for="density">Scan speed / density</label>
+            <select id="density">
+              <option value="200">Easiest — 200 B (sparsest, grabs instantly)</option>
+              <option value="300">Easy — 300 B</option>
+              <option value="400" selected>Balanced — 400 B</option>
+              <option value="500">Compact — 500 B</option>
+              <option value="600">Densest — 600 B (fewest codes)</option>
+            </select>
           </div>
           <div class="field">
             <label for="eccLevel">Error correction</label>
@@ -376,7 +386,7 @@
    the browser is serving a CACHED copy and nothing you see
    reflects the current code.
    ========================================================= */
-const BUILD = 'B10 · 2026-09-19 · in-flow-video';
+const BUILD = 'B11 · 2026-09-19 · low-density';
 document.getElementById('buildTag').textContent = 'build ' + BUILD;
 
 /* ================= tabs ================= */
@@ -451,6 +461,7 @@ const chunkInput   = document.getElementById('chunkSize');
 const autoChunkBox = document.getElementById('autoChunk');
 const eccSel       = document.getElementById('eccLevel');
 const compressSel  = document.getElementById('compress');
+const densitySel   = document.getElementById('density');
 const estimateEl   = document.getElementById('estimate');
 const genBtn       = document.getElementById('genBtn');
 
@@ -502,15 +513,17 @@ function renderFileList(){
 
 const ECC_CAP = { L:2900, M:2300, Q:1600, H:1250 };
 
+/* Density is now capped hard. A QR carrying ~200–600 bytes stays at a low
+   version number (big modules), which is what makes it lock on instantly at
+   speed. File size no longer pushes the density up — it only adds more codes. */
+const HARD_MIN = 150, HARD_MAX = 600;
+
 function suggestChunk(b64len, ecc){
-  const cap = ECC_CAP[ecc] || 2900;
-  let s;
-  if(b64len <= 4000)        s = 350;
-  else if(b64len <= 15000)  s = 600;
-  else if(b64len <= 60000)  s = 900;
-  else if(b64len <= 200000) s = 1400;
-  else                      s = Math.min(cap - 40, 2000);
-  return Math.max(100, Math.min(s, cap - 40));
+  const cap = Math.min(ECC_CAP[ecc] || 2900, HARD_MAX);
+  let want = parseInt(densitySel.value, 10) || 400;
+  // very small payloads: go sparser still, it costs almost nothing
+  if(b64len <= 2500) want = Math.min(want, 250);
+  return Math.max(HARD_MIN, Math.min(want, cap));
 }
 
 let packCache = null;
@@ -534,8 +547,8 @@ function refreshEstimate(){
   const b64len = Math.ceil(payload.length/3)*4;
   const ecc = eccSel.value;
   if(autoChunkBox.checked) chunkInput.value = suggestChunk(b64len, ecc);
-  const cap = ECC_CAP[ecc] - 40;
-  let chunk = parseInt(chunkInput.value,10) || 600;
+  const cap = Math.min(ECC_CAP[ecc], 2860) - 40;
+  let chunk = parseInt(chunkInput.value,10) || 400;
   if(chunk > cap){ chunk = cap; if(autoChunkBox.checked) chunkInput.value = chunk; }
   const total = Math.ceil(b64len / chunk);
 
@@ -545,8 +558,8 @@ function refreshEstimate(){
     + (parseInt(compressSel.value,10) > 0 ? ' → <b>'+fmtKB(payload.length)+'</b> packed ('+saved+'% smaller)' : '')
     + ' · <b>'+total+'</b> QR code(s) at '+chunk+' bytes each'
     + '<br><span style="color:var(--ink-soft)">One full pass ≈ '+secs+'s at 400ms/frame, ≈ '+Math.round(total*0.1)+'s on turbo.</span>';
-  if(chunk > cap - 200) html += '<br><span style="color:var(--amber)">Near the QR capacity limit — codes will be very dense.</span>';
-  if(total > 300) html += '<br><span style="color:var(--amber)">'+total+' codes is a long transfer.</span>';
+  if(chunk > 600) html += '<br><span style="color:var(--amber)">Above 600 bytes the pattern gets dense and a moving camera may miss codes. 200–600 scans fastest.</span>';
+  if(total > 600) html += '<br><span style="color:var(--amber)">'+total+' codes is a long transfer — raise the density a step or send fewer files per batch.</span>';
   estimateEl.innerHTML = html;
 }
 
@@ -554,6 +567,7 @@ chunkInput.addEventListener('input', ()=>{ autoChunkBox.checked = false; refresh
 autoChunkBox.addEventListener('change', refreshEstimate);
 eccSel.addEventListener('change', refreshEstimate);
 compressSel.addEventListener('change', refreshEstimate);
+densitySel.addEventListener('change', ()=>{ autoChunkBox.checked = true; refreshEstimate(); });
 
 genForm.addEventListener('submit', (e)=>{
   e.preventDefault();
@@ -568,8 +582,8 @@ genForm.addEventListener('submit', (e)=>{
       const b64 = bytesToBase64(payload);
       const ecc = eccSel.value;
       currentEcc = ecc;
-      const cap = ECC_CAP[ecc] - 40;
-      let chunk = Math.min(parseInt(chunkInput.value,10) || 600, cap);
+      const cap = Math.min(ECC_CAP[ecc], 2860) - 40;
+      let chunk = Math.min(parseInt(chunkInput.value,10) || 400, cap);
       const id = genId();
       const total = Math.ceil(b64.length / chunk);
 
