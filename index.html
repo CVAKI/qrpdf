@@ -759,7 +759,11 @@ async function runDiagnostics(){
   if(inIframe) blockers.push('The page is inside an embedded preview. Iframes block camera access no matter what your browser settings say — open the file in its own browser tab.');
   if(inAppMatch) blockers.push('This looks like it\'s opened inside another app\'s built-in browser ('+inAppMatch[0]+') rather than Chrome/Safari/Firefox directly. These in-app browsers frequently block or fake camera access even when everything else looks fine. Tap the "⋯" or share menu in that app and choose "Open in Browser" / "Open in Safari" / "Open in Chrome", then try again there.');
   if(!hasAPI) blockers.push('This browser exposes no getUserMedia API at all.');
-  if(camCount === 0) blockers.push('The browser reports zero cameras. If this is a phone, that almost always means the browser itself (see above) is blocking camera enumeration, not that the hardware is missing.');
+  if(camCount === 0 && perm === 'granted'){
+    blockers.push('This is the telltale combination: the <b>website</b> permission shows granted, but the browser still reports zero cameras. That almost always means the phone\'s <b>operating system</b> is blocking the browser app from the camera at a level above the website — a separate switch from the popup you already accepted here. On Android: Settings → Apps → (your browser, e.g. Chrome) → Permissions → Camera → set to Allow. On iPhone: Settings → (your browser, e.g. Safari) → Camera → set to Allow, or Settings → Privacy & Security → Camera → enable it for that browser. After changing it, fully close and reopen the browser app (not just the tab), then reload this page.');
+  } else if(camCount === 0){
+    blockers.push('The browser reports zero cameras. If this is a phone, that almost always means the browser itself (see above) is blocking camera enumeration, not that the hardware is missing.');
+  }
   if(!libs.jsQR) blockers.push('jsQR did not load (CDN blocked or offline) — scanning cannot run until it does.');
 
   if(blockers.length){
@@ -961,20 +965,24 @@ async function startCamera(){
   }
   try{
     stream = await openStream();
-    const track = stream.getVideoTracks()[0];
-    if(track && track.getCapabilities){
-      const caps = track.getCapabilities();
-      if(caps.focusMode && caps.focusMode.includes('continuous')){
-        try{ await track.applyConstraints({ advanced:[{ focusMode:'continuous' }] }); }catch(e){}
+    try{
+      const track = stream.getVideoTracks()[0];
+      if(track && track.getCapabilities){
+        const caps = track.getCapabilities();
+        if(caps.focusMode && caps.focusMode.includes('continuous')){
+          try{ await track.applyConstraints({ advanced:[{ focusMode:'continuous' }] }); }catch(e){}
+        }
+        if(track.getSettings && track.getSettings().facingMode) currentFacing = track.getSettings().facingMode;
       }
-      // if we asked for the back camera but the browser silently gave us something else,
-      // trust its own report of which one it actually opened
-      if(track.getSettings && track.getSettings().facingMode) currentFacing = track.getSettings().facingMode;
+    }catch(capErr){
+      // some browsers expose getCapabilities/getSettings but throw when actually called —
+      // that's cosmetic (autofocus/facingMode reporting), never a reason to abandon a working stream
     }
     runDiagnostics();
   }catch(err){
     camStarting = false;
     document.getElementById('startCamBtn').disabled = false;
+    if(stream){ stream.getTracks().forEach(t=>t.stop()); stream = null; } // release the camera light if we got this far
     if(err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError'){
       if(window.self !== window.top){
         setStatus('Camera blocked — this page is running inside an embedded preview (iframe), and iframes block camera access regardless of your browser permission. Open the HTML file directly in its own tab and try again. Image upload works fine in a preview.', 'warn');
@@ -986,7 +994,15 @@ async function startCamera(){
       if(inAppMatch){
         setStatus('No camera found — this page looks like it\'s open inside '+inAppMatch[0]+'\'s built-in browser, which often blocks camera access entirely. Use that app\'s share/menu button to "Open in Browser" (Chrome/Safari) and try again there, or use "Upload QR image files" here in the meantime.', 'warn');
       } else {
-        setStatus('The browser reports no camera on this device. If this is a phone, re-check the diagnostics above — a 0 camera count there usually means the browser is blocking access rather than the hardware being missing. Otherwise use “Upload QR image files” instead.', 'warn');
+        (async ()=>{
+          let permState = 'unknown';
+          try{ if(navigator.permissions?.query) permState = (await navigator.permissions.query({name:'camera'})).state; }catch(e){}
+          if(permState === 'granted'){
+            setStatus('The website permission shows granted, but the phone reports zero cameras — that\'s the OS itself blocking the browser app from the camera, a level above the website popup. On Android: Settings → Apps → your browser → Permissions → Camera → Allow. On iPhone: Settings → your browser → Camera → Allow (or Settings → Privacy & Security → Camera). Then fully close and reopen the browser app and reload this page.', 'warn');
+          } else {
+            setStatus('The browser reports no camera on this device. Re-check the diagnostics above, or use “Upload QR image files” instead.', 'warn');
+          }
+        })();
       }
       runDiagnostics();
     } else if(err.name === 'NotReadableError'){
@@ -1001,12 +1017,14 @@ async function startCamera(){
   try{
     video.srcObject = stream;
     video.setAttribute('playsinline', true);
-    await video.play();
+    const playResult = video.play();
+    const timeout = new Promise((_, rej)=> setTimeout(()=>rej(new Error('timed out waiting for the camera picture')), 5000));
+    await Promise.race([playResult, timeout]);
   }catch(playErr){
-    stream.getTracks().forEach(t=>t.stop());
-    stream = null;
-    setStatus('The camera stream opened but the preview would not start ('+playErr.message+'). This sometimes happens after switching apps or tabs — try Start camera again.', 'warn');
+    if(stream){ stream.getTracks().forEach(t=>t.stop()); stream = null; }
+    setStatus('The camera stream opened but the preview would not start ('+playErr.message+'). This sometimes happens after switching apps or tabs, or from a cached old copy of this page — try a hard refresh (or an incognito/private tab) and press Start camera again.', 'warn');
     document.getElementById('startCamBtn').disabled = false;
+    camStarting = false;
     return;
   }
   document.getElementById('vpIdle').style.display = 'none';
@@ -1125,6 +1143,12 @@ function clearLock(){
 function scanLoop(){
   if(!stream) return;
   if(video.readyState === video.HAVE_ENOUGH_DATA){
+    // belt-and-suspenders: if we're actually receiving frames, the idle placeholder
+    // and tools row must not still be showing, regardless of what happened earlier
+    const idle = document.getElementById('vpIdle');
+    if(idle && idle.style.display !== 'none') idle.style.display = 'none';
+    const tools = document.getElementById('vpTools');
+    if(tools && tools.style.display === 'none') tools.style.display = 'flex';
     const nativeW = video.videoWidth, nativeH = video.videoHeight;
     const targetW = Math.min(900, nativeW);
     const scanScale = targetW / nativeW;
