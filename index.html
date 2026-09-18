@@ -259,15 +259,6 @@
             </select>
           </div>
           <div class="field">
-            <label for="eccLevel">Error correction</label>
-            <select id="eccLevel">
-              <option value="L" selected>L — 7% (densest, fewest codes)</option>
-              <option value="M">M — 15% (balanced)</option>
-              <option value="Q">Q — 25% (rough conditions)</option>
-              <option value="H">H — 30% (max robustness)</option>
-            </select>
-          </div>
-          <div class="field">
             <label for="compress">Compression</label>
             <select id="compress">
               <option value="9" selected>gzip — maximum</option>
@@ -332,7 +323,15 @@
       <h2>1. Scan the codes</h2>
       <p class="sub">Point your camera at the sequence — any order, repeats are ignored. Leave it running through a few loops until every tile turns green.</p>
 
-      <div id="diagPanel" class="readout" style="margin-bottom:14px;"></div>
+      <div id="diagBar" class="status info" style="cursor:pointer;">Checking environment…</div>
+      <div id="logPanel" style="display:none;">
+        <div class="btn-row" style="margin:10px 0 6px;">
+          <button class="secondary tiny" id="copyLogBtn">📋 Copy logs</button>
+          <button class="secondary tiny" id="clearLogBtn">Clear</button>
+          <span class="meta-line" id="copyLogMsg" style="align-self:center;"></span>
+        </div>
+        <pre id="logBox" class="readout" style="white-space:pre-wrap; max-height:280px; overflow-y:auto; margin-top:0;"></pre>
+      </div>
 
       <div id="mobileCamBlock">
         <div class="btn-row">
@@ -386,7 +385,7 @@
    the browser is serving a CACHED copy and nothing you see
    reflects the current code.
    ========================================================= */
-const BUILD = 'B11 · 2026-09-19 · low-density';
+const BUILD = 'v1.0 · prod';
 document.getElementById('buildTag').textContent = 'build ' + BUILD;
 
 /* ================= tabs ================= */
@@ -459,15 +458,19 @@ const qrGrid       = document.getElementById('qrGrid');
 const fileListEl   = document.getElementById('fileList');
 const chunkInput   = document.getElementById('chunkSize');
 const autoChunkBox = document.getElementById('autoChunk');
-const eccSel       = document.getElementById('eccLevel');
 const compressSel  = document.getElementById('compress');
 const densitySel   = document.getElementById('density');
 const estimateEl   = document.getElementById('estimate');
 const genBtn       = document.getElementById('genBtn');
 
+/* ECC is fixed in production rather than user-facing: M gives real error-correction
+   headroom for a moving-camera scan without eating into the low-density byte budget
+   the way L would force higher density to compensate, or H would waste capacity. */
+const FIXED_ECC = 'M';
+
 let pendingFiles = [];
 let qrPayloads   = [];
-let currentEcc   = 'L';
+let currentEcc   = FIXED_ECC;
 
 document.getElementById('pdfInput').addEventListener('change', async (e)=>{
   const files = Array.from(e.target.files||[]);
@@ -545,7 +548,7 @@ function refreshEstimate(){
   if(!pendingFiles.length){ estimateEl.textContent = 'Add a file to see the estimate.'; return; }
   const { payload, raw } = packedSize();
   const b64len = Math.ceil(payload.length/3)*4;
-  const ecc = eccSel.value;
+  const ecc = FIXED_ECC;
   if(autoChunkBox.checked) chunkInput.value = suggestChunk(b64len, ecc);
   const cap = Math.min(ECC_CAP[ecc], 2860) - 40;
   let chunk = parseInt(chunkInput.value,10) || 400;
@@ -565,7 +568,6 @@ function refreshEstimate(){
 
 chunkInput.addEventListener('input', ()=>{ autoChunkBox.checked = false; refreshEstimate(); });
 autoChunkBox.addEventListener('change', refreshEstimate);
-eccSel.addEventListener('change', refreshEstimate);
 compressSel.addEventListener('change', refreshEstimate);
 densitySel.addEventListener('change', ()=>{ autoChunkBox.checked = true; refreshEstimate(); });
 
@@ -580,7 +582,7 @@ genForm.addEventListener('submit', (e)=>{
     try{
       const { payload, raw } = packedSize();
       const b64 = bytesToBase64(payload);
-      const ecc = eccSel.value;
+      const ecc = FIXED_ECC;
       currentEcc = ecc;
       const cap = Math.min(ECC_CAP[ecc], 2860) - 40;
       let chunk = Math.min(parseInt(chunkInput.value,10) || 400, cap);
@@ -594,7 +596,7 @@ genForm.addEventListener('submit', (e)=>{
 
       renderGridLazy(id, total);
       const names = pendingFiles.map(f=>f.name).join(', ');
-      resultSub.textContent = names+' — '+total+' code(s), ECC '+ecc+', sequence ID '+id
+      resultSub.textContent = names+' — '+total+' code(s), sequence ID '+id
         +'. Play them on this screen and scan with the other device.';
       resultCard.style.display = 'block';
       genStatus.innerHTML = '<div class="status ok">Packed '+fmtKB(raw)+' → '+fmtKB(payload.length)
@@ -765,9 +767,60 @@ window.addEventListener('orientationchange', ()=>setTimeout(fixViewportHeight, 3
 setTimeout(fixViewportHeight, 0);
 setTimeout(fixViewportHeight, 600);
 
-/* ================= environment diagnostics ================= */
-const diagPanel = document.getElementById('diagPanel');
+/* ================= logging ================= */
+const diagBar   = document.getElementById('diagBar');
+const logPanel  = document.getElementById('logPanel');
+const logBox    = document.getElementById('logBox');
+const logLines  = [];
 
+function ts(){
+  const d = new Date();
+  return d.toTimeString().slice(0,8) + '.' + String(d.getMilliseconds()).padStart(3,'0');
+}
+function log(msg){
+  logLines.push('['+ts()+'] '+msg);
+  if(logBox){
+    logBox.textContent = logLines.join('\n');
+    logBox.scrollTop = logBox.scrollHeight;
+  }
+}
+function setDiagBar(kind, text){
+  diagBar.className = 'status ' + kind;
+  diagBar.textContent = text + '  (tap to ' + (logPanel.style.display === 'none' ? 'show' : 'hide') + ' logs)';
+}
+diagBar.addEventListener('click', ()=>{
+  logPanel.style.display = logPanel.style.display === 'none' ? 'block' : 'none';
+  diagBar.textContent = diagBar.textContent.replace(/tap to (show|hide) logs/, 'tap to ' + (logPanel.style.display === 'none' ? 'show' : 'hide') + ' logs');
+});
+document.getElementById('clearLogBtn').addEventListener('click', ()=>{
+  logLines.length = 0;
+  logBox.textContent = '';
+  log('Log cleared.');
+});
+document.getElementById('copyLogBtn').addEventListener('click', async ()=>{
+  const msgEl = document.getElementById('copyLogMsg');
+  const text = logLines.join('\n') || '(no log entries yet)';
+  let ok = false;
+  try{
+    await navigator.clipboard.writeText(text);
+    ok = true;
+  }catch(e){
+    try{
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.focus(); ta.select();
+      ok = document.execCommand('copy');
+      document.body.removeChild(ta);
+    }catch(e2){ ok = false; }
+  }
+  msgEl.textContent = ok ? 'Copied ✓' : 'Copy blocked — tap in the box and select all manually';
+  msgEl.style.color = ok ? 'var(--ok)' : 'var(--amber)';
+  setTimeout(()=>{ msgEl.textContent = ''; }, 3000);
+});
+
+/* ================= environment diagnostics ================= */
 function detectInApp(){
   const ua = navigator.userAgent || '';
   const hits = [];
@@ -808,36 +861,37 @@ async function runDiagnostics(){
     }catch(e){ camCount = 'enumerateDevices failed ('+e.name+')'; }
   }
 
-  const yes = '<span style="color:var(--ok)">ok</span>';
-  const no  = '<span style="color:var(--err)">no</span>';
   const rows = [
     ['Page address', proto + '//' + location.host + (inIframe ? ' (inside an embedded preview)' : '')],
-    ['Secure context (https/localhost)', secure ? yes : no],
-    ['Embedded in iframe', inIframe ? '<span style="color:var(--err)">yes — blocks camera</span>' : yes],
-    ['In-app browser', inApp.length ? '<span style="color:var(--amber)">'+inApp.join(', ')+'</span>' : 'no'],
-    ['getUserMedia available', hasAPI ? yes : no],
+    ['Secure context (https/localhost)', secure ? 'ok' : 'NO'],
+    ['Embedded in iframe', inIframe ? 'YES — blocks camera' : 'ok'],
+    ['In-app browser', inApp.length ? inApp.join(', ') : 'no'],
+    ['getUserMedia available', hasAPI ? 'ok' : 'NO'],
     ['Camera permission', perm],
     ['Cameras reported', camCount + (camLabels ? ' — '+camLabels : '')],
-    ['Libraries', (libs.QRCode?'QRCode '+yes:'QRCode '+no)+' · '+(libs.jsQR?'jsQR '+yes:'jsQR '+no)+' · '+(libs.pako?'pako '+yes:'pako '+no)],
+    ['Libraries', (libs.QRCode?'QRCode ok':'QRCode NO')+' · '+(libs.jsQR?'jsQR ok':'jsQR NO')+' · '+(libs.pako?'pako ok':'pako NO')],
     ['Viewport box', Math.round(viewportEl.clientWidth)+'×'+Math.round(viewportEl.clientHeight)+' px'],
     ['Video state', 'readyState '+video.readyState+' · '+(video.videoWidth||0)+'×'+(video.videoHeight||0)+' · paused '+video.paused]
   ];
-  let html = '<div class="stamp">build '+BUILD+'</div><br><b>Environment check</b><br>' + rows.map(r=>r[0]+': '+r[1]).join('<br>');
 
   const blockers = [];
-  if(!secure) blockers.push('Not a secure context ('+proto+'). Browsers only allow the camera on <b>https://</b> or <b>localhost</b>. Opening the file by double-clicking (file://) will never work. Run <code>python3 -m http.server 8000</code> in the file\'s folder and open <code>http://localhost:8000/pdf-qr-bridge.html</code>.');
-  if(inIframe) blockers.push('The page is inside an embedded preview. Iframes block camera access regardless of browser settings — open it in its own tab.');
-  if(inApp.length) blockers.push('You appear to be in an in-app browser ('+inApp.join(', ')+'). These often block or silently break camera access — tap the ⋯ menu and choose "Open in browser".');
+  if(!secure) blockers.push('Not a secure context ('+proto+'). Camera only works on https:// or localhost. Run "python3 -m http.server 8000" in the file\'s folder and open http://localhost:8000/pdf-qr-bridge.html.');
+  if(inIframe) blockers.push('Page is inside an embedded preview. Iframes block camera access regardless of browser settings — open the page in its own tab.');
+  if(inApp.length) blockers.push('In-app browser detected ('+inApp.join(', ')+'). These often block camera access — use the ⋯ menu and choose "Open in browser".');
   if(!hasAPI) blockers.push('This browser exposes no getUserMedia API at all.');
-  if(camCount === 0) blockers.push('The browser reports <b>0 cameras</b> while permission is '+perm+'. That combination means the phone\'s OS is blocking the browser app itself, not the page. Android: Settings → Apps → [browser] → Permissions → Camera → Allow. iPhone: Settings → [browser] → Camera → Allow. Then fully close and reopen the browser app — a tab reload is not enough.');
-  if(!libs.jsQR) blockers.push('jsQR did not load (CDN blocked or offline) — scanning cannot run until it does.');
+  if(camCount === 0) blockers.push('0 cameras reported while permission is '+perm+'. This means the phone OS is blocking the browser app itself. Android: Settings > Apps > [browser] > Permissions > Camera > Allow. iPhone: Settings > [browser] > Camera > Allow. Fully close and reopen the browser afterward.');
+  if(!libs.jsQR) blockers.push('jsQR did not load (CDN blocked or offline) — scanning cannot run.');
 
+  log('=== Environment check (build ' + BUILD + ') ===');
+  rows.forEach(r=>log(r[0] + ': ' + r[1]));
   if(blockers.length){
-    html += '<br><br><span style="color:var(--amber)"><b>Likely blockers:</b></span><br>• ' + blockers.join('<br>• ');
+    blockers.forEach(b=>log('BLOCKER: ' + b));
+    const worst = !secure || !hasAPI ? 'err' : 'warn';
+    setDiagBar(worst, (inIframe ? '⚠ Blocked — inside an embedded preview' : blockers.length ? '⚠ ' + blockers.length + ' issue(s) found' : '⚠ Camera may not work'));
   } else {
-    html += '<br><br><span style="color:var(--ok)">Nothing is blocking the camera — press Start camera and accept the prompt.</span>';
+    log('No blockers found.');
+    setDiagBar('ok', '✓ Nothing blocking the camera');
   }
-  diagPanel.innerHTML = html;
 }
 
 /* ================= DECODE ================= */
@@ -866,6 +920,7 @@ function setStatus(msg, kind){
   scanStatus.innerHTML = '<div class="status '+(kind||'info')+'">'+msg+'</div>';
 }
 document.getElementById('resetSessionBtn').addEventListener('click', ()=>{
+  log('Session manually reset by user.');
   session = null; downloadArea.innerHTML=''; chunkGrid.innerHTML='';
   progressBar.style.display='none'; progressLabel.style.display='none';
   resetRow.style.display='none'; setStatus('Session cleared — ready for a new sequence.','info');
@@ -873,6 +928,7 @@ document.getElementById('resetSessionBtn').addEventListener('click', ()=>{
 
 function ensureSession(id, total, legacyName){
   if(!session || session.id !== id){
+    log('New sequence detected: ' + id + ' (' + total + ' codes expected).');
     session = { id, total, chunks:new Map(), legacyName: legacyName||null, done:false };
     downloadArea.innerHTML = '';
   }
@@ -926,6 +982,7 @@ function handleDecodedText(text){
 
   ensureSession(id, total, legacyName);
   if(session.id !== id){
+    log('Ignored code from different sequence: ' + id + ' (collecting ' + session.id + ').');
     setStatus('That code belongs to a different sequence ('+id+') — ignored.', 'warn');
     return false;
   }
@@ -938,6 +995,7 @@ function handleDecodedText(text){
 }
 
 function completeSession(){
+  log('All ' + session.total + ' chunks captured for sequence ' + session.id + ' — reassembling.');
   stopCamera();
   let full = '';
   for(let i=0;i<session.total;i++) full += session.chunks.get(i);
@@ -956,15 +1014,18 @@ function completeSession(){
       a.textContent = '↓ '+(f.name||'recovered.pdf')+'  ('+fmtKB(f.bytes.length)+')';
       downloadArea.appendChild(a);
     });
+    log('Reassembled ' + files.length + ' file(s) successfully.');
     setStatus('All '+session.total+' codes received — '+files.length+' file(s) rebuilt.', 'ok');
   }catch(err){
     session.done = false;
+    log('Reassembly FAILED: ' + err.message);
     setStatus('Reassembly failed ('+err.message+') — one code was probably misread. Reset the session and rescan.', 'err');
   }
 }
 
 /* ---------------- camera ---------------- */
 startCamBtn.addEventListener('click', ()=>{ startCamera().catch(e=>{
+  log('UNEXPECTED top-level failure: ' + e.name + ' — ' + e.message);
   setStatus('Unexpected failure starting the camera: '+e.name+' — '+e.message, 'err');
   releaseStream(); startCamBtn.disabled = false; stopCamBtn.disabled = true;
 }); });
@@ -984,21 +1045,26 @@ function withTimeout(promise, ms, label){
 }
 
 async function startCamera(){
+  log('Start camera pressed.');
   if(typeof jsQR !== 'function'){
+    log('ABORT: jsQR not loaded.');
     setStatus('The QR-scanning library failed to load (jsQR missing) — usually a network/CDN issue. Reload the page.', 'warn');
     return;
   }
   if(!window.isSecureContext){
+    log('ABORT: not a secure context (' + location.protocol + ').');
     setStatus('Camera blocked: this page is not on https:// or localhost. Host the file, or use “Upload QR image files” below.', 'warn');
     return;
   }
   if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+    log('ABORT: no getUserMedia API in this browser.');
     setStatus('This browser exposes no camera API. Try Chrome, Safari or Firefox, or upload QR images.', 'warn');
     return;
   }
 
   startCamBtn.disabled = true;
   setStatus('Requesting camera…', 'info');
+  log('Calling getUserMedia (facingMode: ideal environment)…');
   fixViewportHeight();
 
   /* --- 1. acquire the stream (back camera only, never {exact:…}) --- */
@@ -1008,15 +1074,21 @@ async function startCamera(){
       s = await navigator.mediaDevices.getUserMedia({
         video:{ facingMode:{ ideal:'environment' }, width:{ ideal:1920 }, height:{ ideal:1080 } }
       });
+      log('getUserMedia resolved on first attempt.');
     }catch(inner){
+      log('First getUserMedia attempt failed: ' + inner.name + ' — ' + inner.message);
       if(['OverconstrainedError','ConstraintNotSatisfiedError','NotFoundError','TypeError','NotReadableError'].indexOf(inner.name) !== -1){
+        log('Retrying with bare {video:true}…');
         s = await navigator.mediaDevices.getUserMedia({ video:true });
+        log('Bare retry resolved.');
       } else throw inner;
     }
   }catch(err){
+    log('getUserMedia FAILED: ' + err.name + ' — ' + err.message);
     startCamBtn.disabled = false;
     if(err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError'){
       let inIframe = false; try{ inIframe = window.self !== window.top; }catch(e){ inIframe = true; }
+      log('Permission denied. inIframe=' + inIframe);
       setStatus(inIframe
         ? 'Camera blocked — this page is inside an embedded preview (iframe). Iframes block the camera no matter what your browser permission says. Open the page in its own tab.'
         : 'Permission reported as denied. Reload the page, press Start camera and accept the prompt. If your browser says it is allowed, check the OS-level camera permission for the browser app itself.', 'warn');
@@ -1032,10 +1104,11 @@ async function startCamera(){
   }
 
   stream = s;
+  log('Stream acquired. Tracks: ' + stream.getVideoTracks().map(t=>t.label||'(unlabeled)').join(', '));
 
   /* --- 2. attach to the <video>. Hide the placeholder as soon as ANY
            readiness signal fires, independent of play() resolving. --- */
-  const reveal = ()=>{ video.style.display = 'block'; vpIdle.style.display = 'none'; fixViewportHeight(); };
+  const reveal = ()=>{ log('Video readiness event fired — revealing preview.'); video.style.display = 'block'; vpIdle.style.display = 'none'; fixViewportHeight(); };
   video.addEventListener('loadedmetadata', reveal, { once:true });
   video.addEventListener('loadeddata',     reveal, { once:true });
   video.addEventListener('playing',        reveal, { once:true });
@@ -1045,8 +1118,10 @@ async function startCamera(){
     video.setAttribute('webkit-playsinline','');
     video.muted = true;
     video.srcObject = stream;
+    log('Assigned stream to video.srcObject.');
   }catch(e){
-    try{ video.src = URL.createObjectURL(stream); }catch(e2){}
+    log('srcObject assignment failed (' + e.message + '), falling back to createObjectURL.');
+    try{ video.src = URL.createObjectURL(stream); }catch(e2){ log('createObjectURL fallback also failed: ' + e2.message); }
   }
 
   /* --- 3. play() inside try/catch WITH a timeout, so a hang or a
@@ -1054,12 +1129,15 @@ async function startCamera(){
   let playErr = null;
   try{
     await withTimeout(video.play(), 7000, 'video.play()');
+    log('video.play() resolved.');
   }catch(e){
     playErr = e;
+    log('video.play() did not resolve cleanly: ' + e.message);
   }
 
   if(playErr && video.readyState < 2){
     // genuinely dead — release the camera instead of leaving it lit
+    log('readyState still ' + video.readyState + ' after play() failure — releasing camera.');
     releaseStream();
     startCamBtn.disabled = false;
     stopCamBtn.disabled = true;
@@ -1069,7 +1147,7 @@ async function startCamera(){
     runDiagnostics();
     return;
   }
-  if(playErr) setStatus('Note: play() reported "'+playErr.message+'" but frames are arriving — continuing.', 'warn');
+  if(playErr){ log('Frames are arriving despite play() issue — continuing.'); setStatus('Note: play() reported "'+playErr.message+'" but frames are arriving — continuing.', 'warn'); }
 
   video.style.display = 'block';
   vpIdle.style.display = 'none';
@@ -1078,12 +1156,14 @@ async function startCamera(){
   /* --- 4. capability probing is fully isolated: on some phones
            getCapabilities() exists but throws, and that must not
            abort anything above. --- */
-  try{ setupCamTools(); }catch(e){ /* torch/zoom simply stay hidden */ }
+  try{ setupCamTools(); log('Capability probe (torch/zoom/focus) completed.'); }
+  catch(e){ log('Capability probe threw (' + e.message + ') — isolated, continuing.'); }
 
   stopCamBtn.disabled = false;
   scanStartedAt = performance.now();
   lastFrameCheck = 0; frames = 0; fpsMark = performance.now(); fps = 0;
   fixViewportHeight();
+  log('Camera fully started, entering scan loop. Video ' + video.videoWidth + '×' + video.videoHeight + '.');
   runDiagnostics();
   scanLoop();
 }
@@ -1136,6 +1216,7 @@ function setupCamTools(){
 }
 
 function stopCamera(){
+  log('Stop camera called.');
   if(rafId) cancelAnimationFrame(rafId);
   rafId = null;
   releaseStream();
