@@ -92,14 +92,21 @@ function packedSize(){
   if(packCache && packCache.key === key) return packCache;
   const container = buildContainer(pendingFiles);
   const level = parseInt(compressSel.value,10);
-  const payload = level > 0 ? pako.gzip(container, { level }) : container;
-  packCache = { key, payload, raw: container.length };
+  let payload = container, gzipped = false;
+  if(level > 0){
+    const gz = pako.gzip(container, { level });
+    /* JPG / PNG / ZIP / DOCX are already compressed: gzip can't shrink them and only
+       adds overhead. Keep the gzip result only when it actually wins; the receiver
+       detects both forms by itself. */
+    if(gz.length < container.length){ payload = gz; gzipped = true; }
+  }
+  packCache = { key, payload, raw: container.length, gzipped };
   return packCache;
 }
 
 function refreshEstimate(){
   if(!pendingFiles.length){ estimateEl.textContent = 'Add a file to see the estimate.'; return; }
-  const { payload, raw } = packedSize();
+  const { payload, raw, gzipped } = packedSize();
   const b64len = Math.ceil(payload.length/3)*4;
   const ecc = FIXED_ECC;
   if(autoChunkBox.checked) chunkInput.value = suggestChunk(b64len, ecc);
@@ -109,13 +116,20 @@ function refreshEstimate(){
   const total = Math.ceil(b64len / chunk);
 
   const saved = raw ? Math.round(100 - (payload.length/raw)*100) : 0;
-  const secs = Math.round(total * 400 / 1000);
+  const secs = total * 400 / 1000;
   let html = '<b>'+pendingFiles.length+'</b> file(s) · <b>'+fmtKB(raw)+'</b> raw'
-    + (parseInt(compressSel.value,10) > 0 ? ' → <b>'+fmtKB(payload.length)+'</b> packed ('+saved+'% smaller)' : '')
+    + (gzipped ? ' → <b>'+fmtKB(payload.length)+'</b> packed ('+saved+'% smaller)' : '')
     + ' · <b>'+total+'</b> QR code(s) at '+chunk+' bytes each'
-    + '<br><span style="color:var(--ink-soft)">One full pass ≈ '+secs+'s at 400ms/frame, ≈ '+Math.round(total*0.1)+'s on turbo.</span>';
+    + '<br><span style="color:var(--ink-soft)">One full pass ≈ '+fmtDur(secs)+' at 400ms/frame, ≈ '+fmtDur(total*0.1)+' on turbo.</span>';
   if(chunk > 600) html += '<br><span style="color:var(--amber)">Above 600 bytes the pattern gets dense and a moving camera may miss codes. 200–600 scans fastest.</span>';
-  if(total > 600) html += '<br><span style="color:var(--amber)">'+total+' codes is a long transfer — raise the density a step or send fewer files per batch.</span>';
+  if(parseInt(compressSel.value,10) > 0 && !gzipped)
+    html += '<br><span style="color:var(--ink-soft)">Already-compressed data (photos, PNGs, ZIPs) — sent as-is, gzip can\'t shrink it.</span>';
+  if(total > 600){
+    const hasImg = pendingFiles.some(f=>/^image\//.test(guessMime(f.name, f.bytes)));
+    html += '<br><span style="color:var(--amber)">'+total+' codes is a long transfer'
+      + (hasImg ? ' — phone photos are big, so resize or compress the image first' : '')
+      + '. Raise the density a step or send fewer files per batch.</span>';
+  }
   estimateEl.innerHTML = html;
 }
 
