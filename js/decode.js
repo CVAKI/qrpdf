@@ -111,15 +111,28 @@ function completeSession(){
     let bytes = base64ToBytes(full);
     if(bytes[0] === 0x1f && bytes[1] === 0x8b) bytes = pako.ungzip(bytes);
     let files = parseContainer(bytes);
-    if(!files) files = [{ name: session.legacyName || 'recovered.pdf', bytes }];
+    if(!files) files = [{ name: session.legacyName || recoveredName(bytes), bytes }];
     downloadArea.innerHTML = '';
     files.forEach(f=>{
-      const blob = new Blob([f.bytes], { type:'application/pdf' });
+      const name = f.name || recoveredName(f.bytes);
+      const mime = guessMime(name, f.bytes);          /* was hard-coded to application/pdf */
+      const url  = URL.createObjectURL(new Blob([f.bytes], { type:mime }));
+      log('Rebuilt ' + name + ' → ' + mime + ' (' + f.bytes.length + ' bytes).');
+
+      if(isPreviewable(mime)){                        /* images get a thumbnail */
+        const img = document.createElement('img');
+        img.src = url; img.alt = name; img.className = 'dl-thumb';
+        img.style.cssText = 'display:block;max-width:100%;max-height:280px;margin:0 auto;object-fit:contain;'
+          + 'border-radius:12px;border:1px solid var(--border);background:var(--bg-inset);';
+        img.onerror = ()=>img.remove();               /* format the browser can't draw: just skip the preview */
+        downloadArea.appendChild(img);
+      }
+
       const a = document.createElement('a');
       a.className = 'download-link';
-      a.href = URL.createObjectURL(blob);
-      a.download = f.name || 'recovered.pdf';
-      a.textContent = '↓ '+(f.name||'recovered.pdf')+'  ('+fmtKB(f.bytes.length)+')';
+      a.href = url;
+      a.download = name;
+      a.textContent = '↓ '+name+'  ('+fmtKB(f.bytes.length)+')';
       downloadArea.appendChild(a);
     });
     log('Reassembled ' + files.length + ' file(s) successfully.');
