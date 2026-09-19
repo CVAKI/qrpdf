@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>QrPDF — PDF ⇄ QR</title>
+<title>QrPDF — files ⇄ QR</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -66,8 +66,8 @@
 
   <!-- ============ TABS ============ -->
   <nav class="tab-nav">
-    <button type="button" class="tab active" data-tab="encode"><svg class="ic ic-18"><use href="#i-upload"/></svg><span>Encode PDF → QR</span></button>
-    <button type="button" class="tab" data-tab="decode"><svg class="ic ic-18"><use href="#i-scan"/></svg><span>Scan QR → PDF</span></button>
+    <button type="button" class="tab active" data-tab="encode"><svg class="ic ic-18"><use href="#i-upload"/></svg><span>Encode files → QR</span></button>
+    <button type="button" class="tab" data-tab="decode"><svg class="ic ic-18"><use href="#i-scan"/></svg><span>Scan QR → files</span></button>
   </nav>
 
   <main class="panel-container">
@@ -80,14 +80,14 @@
       <form id="genForm" class="stack">
 
         <div class="card">
-          <div class="section-title"><span>Source documents</span><span class="step-pill">STEP 1</span></div>
-          <p class="sub">Add one or more files. They are packed into a single sequence, compressed, split across QR codes and rebuilt on the other side.</p>
+          <div class="section-title"><span>Source files</span><span class="step-pill">STEP 1</span></div>
+          <p class="sub">Add one or more files — PDFs, images (JPG, PNG…), ZIPs or anything else. They are packed into a single sequence, compressed, split across QR codes and rebuilt on the other side.</p>
 
           <div class="dropzone" id="dropzoneBox">
-            <input type="file" id="pdfInput" accept="application/pdf,*/*" multiple>
+            <input type="file" id="pdfInput" accept="*/*" multiple>
             <div class="dropzone-icon-ring"><svg class="ic"><use href="#i-file-plus"/></svg></div>
-            <div class="dropzone-text">Drop PDF files here or click to browse</div>
-            <div class="dropzone-hint">No server · no upload · everything stays in this tab</div>
+            <div class="dropzone-text">Drop files here or click to browse</div>
+            <div class="dropzone-hint">PDF · JPG · PNG · ZIP · any file — no server, no upload</div>
           </div>
 
           <div class="filelist" id="fileList"><div class="empty">No files added yet.</div></div>
