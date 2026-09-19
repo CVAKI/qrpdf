@@ -6,7 +6,7 @@
 /* BUILD STAMP — bump this on every edit. If the number shown
    in the header / diagnostics panel is not the latest one,
    the browser is serving a CACHED copy. */
-const BUILD = 'v1.0 · prod';
+const BUILD = 'v1.1 · files';
 document.getElementById('buildTag').textContent = 'build ' + BUILD;
 
 /* ================= tabs ================= */
@@ -24,7 +24,17 @@ document.querySelectorAll('.tab').forEach(t=>{
 /* ================= helpers ================= */
 const MAGIC = 'PQPDF2';
 function genId(){ return Math.random().toString(36).slice(2,8).toUpperCase(); }
-function fmtKB(b){ return b < 1024 ? b+' B' : (b/1024).toFixed(1)+' KB'; }
+function fmtKB(b){
+  if(b < 1024) return b+' B';
+  if(b < 1024*1024) return (b/1024).toFixed(1)+' KB';
+  return (b/1024/1024).toFixed(2)+' MB';
+}
+function fmtDur(s){
+  s = Math.round(s);
+  if(s < 90) return s+'s';
+  if(s < 5400) return Math.round(s/60)+' min';
+  return (s/3600).toFixed(1)+' h';
+}
 function eccConst(v){
   return {L:QRCode.CorrectLevel.L, M:QRCode.CorrectLevel.M, Q:QRCode.CorrectLevel.Q, H:QRCode.CorrectLevel.H}[v] || QRCode.CorrectLevel.L;
 }
@@ -41,6 +51,56 @@ function base64ToBytes(b64){
   const bytes = new Uint8Array(binary.length);
   for(let i=0;i<binary.length;i++) bytes[i] = binary.charCodeAt(i);
   return bytes;
+}
+
+/* ================= file types ================= */
+/* The container stores only name + bytes, so the receiver has to work out the
+   MIME type itself. Extension first, then magic bytes, then a generic fallback.
+   (A wrong type is what makes phones rename / mis-open downloads.) */
+const MIME_BY_EXT = {
+  pdf:'application/pdf',
+  jpg:'image/jpeg', jpeg:'image/jpeg', jpe:'image/jpeg', jfif:'image/jpeg',
+  png:'image/png', gif:'image/gif', webp:'image/webp', bmp:'image/bmp',
+  svg:'image/svg+xml', avif:'image/avif', heic:'image/heic', heif:'image/heif',
+  tif:'image/tiff', tiff:'image/tiff', ico:'image/x-icon',
+  zip:'application/zip', '7z':'application/x-7z-compressed', rar:'application/vnd.rar',
+  gz:'application/gzip', tar:'application/x-tar',
+  txt:'text/plain', csv:'text/csv', json:'application/json', md:'text/markdown', html:'text/html',
+  docx:'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  xlsx:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  pptx:'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+  apk:'application/vnd.android.package-archive',
+  mp3:'audio/mpeg', wav:'audio/wav', mp4:'video/mp4'
+};
+/* types every browser can draw in an <img> — used for the preview on the receiving side */
+const PREVIEW_MIMES = ['image/jpeg','image/png','image/gif','image/webp','image/bmp','image/svg+xml','image/avif'];
+
+function extOf(name){
+  const m = /\.([A-Za-z0-9]+)$/.exec(name || '');
+  return m ? m[1].toLowerCase() : '';
+}
+function sniffType(b){
+  if(!b || b.length < 4) return null;
+  if(b[0]===0x25 && b[1]===0x50 && b[2]===0x44 && b[3]===0x46) return { mime:'application/pdf', ext:'pdf' };
+  if(b[0]===0x89 && b[1]===0x50 && b[2]===0x4E && b[3]===0x47) return { mime:'image/png',  ext:'png' };
+  if(b[0]===0xFF && b[1]===0xD8 && b[2]===0xFF)                return { mime:'image/jpeg', ext:'jpg' };
+  if(b[0]===0x47 && b[1]===0x49 && b[2]===0x46 && b[3]===0x38) return { mime:'image/gif',  ext:'gif' };
+  if(b[0]===0x50 && b[1]===0x4B && (b[2]===0x03 || b[2]===0x05)) return { mime:'application/zip', ext:'zip' };
+  if(b.length > 11 && b[0]===0x52 && b[1]===0x49 && b[2]===0x46 && b[3]===0x46
+     && b[8]===0x57 && b[9]===0x45 && b[10]===0x42 && b[11]===0x50) return { mime:'image/webp', ext:'webp' };
+  return null;
+}
+function guessMime(name, bytes){
+  const byExt = MIME_BY_EXT[extOf(name)];
+  if(byExt) return byExt;
+  const s = sniffType(bytes);
+  return s ? s.mime : 'application/octet-stream';
+}
+function isPreviewable(mime){ return PREVIEW_MIMES.indexOf(mime) !== -1; }
+/* only used for old-format sequences that carried no file name */
+function recoveredName(bytes){
+  const s = sniffType(bytes);
+  return 'recovered.' + (s ? s.ext : 'pdf');
 }
 
 /* ================= container format ================= */
