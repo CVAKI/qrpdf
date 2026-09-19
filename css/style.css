@@ -375,7 +375,7 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
   color: var(--text-muted);
 }
 
-input[type="number"], select {
+input[type="number"], #playGoInput, select {
   width: 100%;
   background: var(--bg-surface-elevated);
   border: 1px solid var(--border);
@@ -387,7 +387,7 @@ input[type="number"], select {
   outline: none;
   transition: border-color 0.2s, box-shadow 0.2s;
 }
-input[type="number"]:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 10px rgba(0, 242, 170, 0.25); }
+input[type="number"]:focus, #playGoInput:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 10px rgba(0, 242, 170, 0.25); }
 input[type="range"] { accent-color: var(--accent); cursor: pointer; }
 
 .checkbox-field {
