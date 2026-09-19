@@ -545,10 +545,27 @@ input[type="range"] { accent-color: var(--accent); cursor: pointer; }
 }
 #playOverlay.active { opacity: 1; visibility: visible; pointer-events: auto; }
 
-.player-top-bar { width: 100%; max-width: 640px; display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
-.player-meta { display: flex; flex-direction: column; gap: 0.2rem; min-width: 0; }
+/* top bar: [frame counter] [go-to box] [close] / hint row underneath */
+.player-top-bar { width: 100%; max-width: 640px; display: grid; grid-template-columns: 1fr auto auto; align-items: center; column-gap: 0.75rem; row-gap: 0.4rem; }
+#playSub { grid-column: 1 / -1; }
 #playInfo { font-family: var(--font-mono); font-size: 1.2rem; font-weight: 700; color: var(--accent); letter-spacing: 0.04em; }
 #playSub { font-family: var(--font-mono); font-size: 0.72rem; color: var(--text-muted); }
+/* go-to-frame box (jump to a code the scanner reports as missing) */
+.play-go { display: flex; align-items: center; gap: 0.4rem; }
+#playGoInput {
+  width: 92px; padding: 0.5rem 0.6rem; font-size: 0.85rem; text-align: center;
+  -moz-appearance: textfield; appearance: textfield;
+}
+#playGoInput::-webkit-outer-spin-button, #playGoInput::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+#playGoInput.invalid { border-color: var(--danger); box-shadow: 0 0 10px rgba(244, 63, 94, 0.35); }
+.player-go-btn {
+  height: 36px; padding: 0 0.9rem; border-radius: var(--radius-sm);
+  background: var(--bg-surface-elevated); border: 1px solid var(--accent); color: var(--accent);
+  font-family: var(--font-mono); font-size: 0.8rem; font-weight: 700;
+  transition: all 0.2s;
+}
+.player-go-btn:hover { background: var(--accent); color: var(--on-accent); }
+
 #playClose {
   flex: none;
   background: var(--bg-surface-elevated);
