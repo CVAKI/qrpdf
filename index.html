@@ -55,11 +55,11 @@
       <div class="brand-glyph"><svg class="ic"><use href="#i-qr"/></svg></div>
       <div class="brand-text">
         <h1>Qr<span class="highlight">PDF</span></h1>
-        <div class="brand-tag"><span class="status-dot"></span> Air-gapped optical transfer 100% Local </div>
+        <div class="brand-tag"><span class="status-dot"></span> Air-gapped optical transfer</div>
       </div>
     </div>
     <div class="meta-badges">
-      <div class="badge-secure"><svg class="ic ic-16"><use href="#i-shield"/></svg><span> CVAKI </span></div>
+      <div class="badge-secure"><svg class="ic ic-16"><use href="#i-shield"/></svg><span>100% client-side</span></div>
       <div class="build-tag" id="buildTag"></div>
     </div>
   </header>
@@ -247,11 +247,13 @@
 <!-- ================================================= -->
 <div id="playOverlay">
   <div class="player-top-bar">
-    <div class="player-meta">
-      <div id="playInfo">1 / 1</div>
-      <div id="playSub">Point the other device's camera at this screen</div>
+    <div id="playInfo">1 / 1</div>
+    <div class="play-go">
+      <input type="number" id="playGoInput" min="1" step="1" inputmode="numeric" enterkeyhint="go" placeholder="Go to #" aria-label="Go to frame number">
+      <button type="button" id="playGoBtn" class="player-go-btn">Go</button>
     </div>
     <button type="button" id="playClose" title="Close player" aria-label="Close player"><svg class="ic"><use href="#i-x"/></svg></button>
+    <div id="playSub">Point the other device's camera at this screen</div>
   </div>
 
   <div id="playStage"></div>
